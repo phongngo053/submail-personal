@@ -29,6 +29,9 @@ submail-data.json
 .idea/
 *.swp
 
+# Local scratch pages used while tweaking the UI
+desktop/frontend/harness.html
+
 # OS noise
 .DS_Store
 Thumbs.db

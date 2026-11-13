@@ -260,11 +260,11 @@ func TestSaveGmailKeepsPasswordWhileLocked(t *testing.T) {
 	app.locked = true
 
 	if _, err := app.SaveGmail(AccountView{
-		Email:      fixtureEmail,
-		Tag:        "Mail Chính",
-		Color:      "blue",
-		Password:   "••••••••••••••",
-		Secret2FA:  "••••••••••••",
+		Email:       fixtureEmail,
+		Tag:         "Mail Chính",
+		Color:       "blue",
+		Password:    "••••••••••••••",
+		Secret2FA:   "••••••••••••",
 		AppPassword: "••••••••••••••",
 	}); err != nil {
 		t.Fatalf("SaveGmail() error = %v", err)
