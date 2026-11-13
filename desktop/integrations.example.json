@@ -1,0 +1,14 @@
+{
+  "_comment": "Copy this file to %AppData%\\SubMailPersonal\\integrations.json (Windows) or ~/.config/SubMailPersonal/integrations.json (Linux/macOS) and fill in your own service. The file is read from disk at runtime and is never committed. Set SUBMAIL_INTEGRATIONS_CONFIG to use a different location.",
+  "integrations": [
+    {
+      "id": "local-image",
+      "name": "Dịch vụ tạo ảnh trên máy tôi",
+      "type": "image",
+      "baseUrl": "http://localhost:8000",
+      "apiKey": "REPLACE_ME",
+      "model": "",
+      "enabled": false
+    }
+  ]
+}

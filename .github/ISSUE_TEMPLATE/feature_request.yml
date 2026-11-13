@@ -1,0 +1,33 @@
+name: Đề xuất tính năng
+description: Đề xuất một tính năng mới hoặc cải thiến cho SubMail Personal.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã đề xuất!
+
+        Nếu tính năng cần gọi một dịch vụ bên ngoài, hãy nói rõ dịch vụ đó chạy ở đâu
+        (trên máy người dùng hay trên máy chủ) — app chỉ hỗ trợ tích hợp tự cấu hình.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Vấn đề cần giải quyết
+      description: Bạn đang gặp khó khăn gì? Tính năng này giúp gì?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Đề xuất giải pháp
+      description: Mô tả ngắn gọn bạn muốn app làm gì.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Giải pháp thay thế đã cân nhắc

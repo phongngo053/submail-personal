@@ -1,0 +1,65 @@
+name: Báo lỗi
+description: Báo lỗi SubMail Personal không hoạt động đúng.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã báo lỗi!
+
+        **Lưu ý:** nếu vấn đề liên quan tới bảo mật, đừng mở issue công khai.
+        Hãy xem [`SECURITY.md`](https://github.com/phongngo053/submail-personal/blob/main/SECURITY.md).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Mô tả lỗi
+      description: Điều gì xảy ra? Bạn mong đợi điều gì?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Các bước tái hiện
+      placeholder: |
+        1. Mở app và vào trang Két Gmail
+        2. Bấm "Thêm Gmail"
+        3. Thấy lỗi ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Phiên bản
+      placeholder: v0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Hệ điều hành
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: go-version
+    attributes:
+      label: Phiên bản Go
+      placeholder: go1.26.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log hoặc ảnh chụp màn hình
+      description: Dán output của `go test ./...` hoặc ảnh chụp màn hình nếu có.

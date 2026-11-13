@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SubMail Personal — Quản Lý Gmail Cá Nhân, Pass, 2FA &amp; Subscriptions</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+  <style>
+    :root {
+      --background: #f8fafc;
+      --card: #ffffff;
+      --content: #f1f5f9;
+      --foreground: #0f172a;
+      --muted-foreground: #64748b;
+      --border: #e2e8f0;
+      --secondary: #e2e8f0;
+      --placeholder: #94a3b8;
+    }
+    html.dark {
+      --background: #090d16;
+      --card: #111827;
+      --content: #1e293b;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
+      --border: #1f2937;
+      --secondary: #334155;
+      --placeholder: #64748b;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin-slow { animation: spin 1s linear infinite; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] min-h-screen antialiased flex flex-col transition-colors duration-200">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-[var(--card)] border-b border-[var(--border)] px-6 py-3 shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-lg tracking-tight text-[var(--foreground)]">SubMail Personal</h1>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-500 border border-indigo-500/30">Cá Nhân</span>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)]">Quản lý nhiều Gmail cá nhân (Pass + 2FA Live) &amp; các gói đăng ký</p>
+        </div>
+      </div>
+
+      <!-- Primary View Switcher -->
+      <div class="flex items-center bg-[var(--content)] p-1 rounded-xl border border-[var(--border)]">
+        <button onclick="switchMainView('vault')" id="tabBtnVault" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+          <span>Gmail (Pass + 2FA) &amp; Subs</span>
+        </button>
+        <button onclick="switchMainView('overview')" id="tabBtnOverview" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          <span>Tất cả Subscriptions</span>
+        </button>
+      </div>
+
+      <!-- Right Actions: Theme + Backup + Vault Lock + Add -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleTheme()" class="p-2 text-xs font-medium bg-[var(--content)] text-[var(--foreground)] hover:bg-[var(--secondary)] rounded-lg border border-[var(--border)] transition" title="Đổi giao diện Sáng / Tối">
+          <span id="themeIcon">☀️</span>
+        </button>
+
+        <button onclick="openModal('backupDataModal')" class="px-2.5 py-1.5 text-xs font-medium bg-[var(--content)] text-[var(--foreground)] hover:bg-[var(--secondary)] rounded-lg border border-[var(--border)] transition" title="Sao lưu / Khôi phục JSON">
+          💾 Sao lưu
+        </button>
+
+        <button onclick="toggleVaultLock()" id="vaultLockBtn" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition bg-emerald-500/10 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/20">
+          <span id="vaultLockText">🔓 Két Đang Mở</span>
+        </button>
+
+        <button onclick="openModal('addGmailModal')" class="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>Thêm Gmail</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- PERSONAL SUMMARY STRIP -->
+  <div class="bg-[var(--card)] border-b border-[var(--border)] px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div class="flex flex-wrap items-center gap-4">
+        <span class="flex items-center gap-1.5 text-[var(--foreground)]">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <strong><span id="stripTotalGmails">5</span> Gmail cá nhân</strong>
+        </span>
+        <span class="text-[var(--muted-foreground)]">•</span>
+        <span class="text-[var(--foreground)]">
+          <strong><span id="stripTotalSubs">14</span> gói đăng ký</strong> đang chạy
+        </span>
+        <span class="text-[var(--muted-foreground)]">•</span>
+        <span class="text-[var(--foreground)]">
+          Chi tiêu cá nhân: <strong class="text-indigo-500 tabular-nums" id="stripTotalCost">$136.45/tháng</strong>
+          <span class="text-[var(--muted-foreground)] tabular-nums" id="stripTotalVnd">(~3.465.000đ/tháng)</span>
+        </span>
+      </div>
+      <div class="flex items-center gap-3 text-[var(--muted-foreground)]">
+        <span class="text-amber-500 font-semibold" id="stripExpiringAlert">⏰ 2 gói sắp gia hạn</span>
+        <span>•</span>
+        <span>Mã 2FA đổi sau: <strong class="text-[var(--foreground)] tabular-nums" id="globalTotpTimer">24s</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 1: MASTER-DETAIL PERSONAL GMAIL VAULT (PASS + 2FA) & SUBSCRIPTIONS   -->
+  <!-- ========================================================================= -->
+  <main id="viewVault" class="max-w-7xl mx-auto px-6 py-6 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- LEFT COLUMN (4/12): PERSONAL GMAIL ACCOUNTS LIST -->
+      <aside class="lg:col-span-4 bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden flex flex-col">
+        <div class="p-4 border-b border-[var(--border)] space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-[var(--foreground)]">Các Gmail Cá Nhân Của Tôi</h2>
+            <button onclick="openModal('addGmailModal')" class="text-xs font-semibold text-indigo-500 hover:underline">+ Thêm Gmail</button>
+          </div>
+          
+          <!-- Search -->
+          <div class="relative">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input id="vaultSearchGmail" type="text" onkeyup="renderVaultAccountList()" placeholder="Tìm địa chỉ Gmail, ghi chú..." 
+              class="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg bg-[var(--content)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--placeholder)] focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+          </div>
+
+          <!-- Personal Tag Filter Pills -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <button onclick="setVaultTagFilter('all')" data-vtag="all" class="vtag-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white whitespace-nowrap">Tất cả</button>
+            <button onclick="setVaultTagFilter('Mail Chính')" data-vtag="Mail Chính" class="vtag-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--content)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] whitespace-nowrap">Mail Chính</button>
+            <button onclick="setVaultTagFilter('AI & Công Cụ')" data-vtag="AI & Công Cụ" class="vtag-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--content)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] whitespace-nowrap">AI</button>
+            <button onclick="setVaultTagFilter('Giải Trí')" data-vtag="Giải Trí" class="vtag-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--content)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] whitespace-nowrap">Giải Trí</button>
+            <button onclick="setVaultTagFilter('Học Tập / Dev')" data-vtag="Học Tập / Dev" class="vtag-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--content)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] whitespace-nowrap">Học / Dev</button>
+            <button onclick="setVaultTagFilter('Mua Sắm / Phụ')" data-vtag="Mua Sắm / Phụ" class="vtag-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--content)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] whitespace-nowrap">Phụ</button>
+          </div>
+        </div>
+
+        <!-- Account Cards List -->
+        <div id="vaultAccountList" class="divide-y divide-[var(--border)] max-h-[680px] overflow-y-auto"></div>
+      </aside>
+
+      <!-- RIGHT COLUMN (8/12): CREDENTIALS (PASS + 2FA) & SUBSCRIPTIONS OF SELECTED GMAIL -->
+      <section class="lg:col-span-8 space-y-6">
+        
+        <!-- VAULT CREDENTIALS CARD -->
+        <div class="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden">
+          
+          <!-- Account Header -->
+          <div class="p-5 border-b border-[var(--border)] bg-[var(--content)] flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div id="detailAvatar" class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-sm">MC</div>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h2 id="detailEmail" class="text-base font-bold text-[var(--foreground)] font-mono">vi-du-1@example.com</h2>
+                  <button onclick="copyTextById('detailEmail', 'Đã sao chép địa chỉ Gmail')" class="p-1 rounded hover:bg-[var(--card)] text-[var(--muted-foreground)] hover:text-indigo-500 transition" title="Sao chép Gmail">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                  </button>
+                  <span id="detailTagBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-500 border border-blue-500/30">Mail Chính</span>
+                </div>
+                <div class="text-xs text-[var(--muted-foreground)] mt-1 flex items-center gap-3 flex-wrap">
+                  <span id="detailRecoveryDisplay">Khôi phục: backup@example.com</span>
+                  <span>•</span>
+                  <span id="detailNoteDisplay" class="italic"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="openEditCredentialsModal()" class="px-3 py-1.5 text-xs font-semibold bg-[var(--card)] hover:bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)] rounded-lg transition">Sửa Pass / 2FA</button>
+              <button onclick="openBackupCodesModal()" class="px-3 py-1.5 text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 border border-indigo-500/30 rounded-lg transition">8 Mã Dự Phòng</button>
+              <button onclick="deleteSelectedGmail()" class="p-1.5 text-xs text-rose-500 hover:bg-rose-500/10 rounded-lg border border-transparent hover:border-rose-500/30 transition" title="Xóa tài khoản này">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Password + Live 2FA Grid -->
+          <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Password Box -->
+            <div class="p-4 rounded-xl bg-[var(--content)] border border-[var(--border)] space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Mật Khẩu Gmail</span>
+                <span class="text-xs text-emerald-500 font-semibold">Đã lưu cục bộ</span>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 bg-[var(--card)] px-3 py-2.5 rounded-lg border border-[var(--border)]">
+                <span id="detailPasswordText" class="font-mono text-sm font-bold text-[var(--foreground)] tracking-wider truncate">••••••••••••••</span>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button onclick="toggleDetailPassword()" class="p-1.5 rounded-md hover:bg-[var(--content)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition" title="Hiện / Ẩn mật khẩu">👁️</button>
+                  <button onclick="copySelectedPassword()" class="px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition">Copy</button>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+                <span>SĐT: <strong id="detailPhoneDisplay" class="text-[var(--foreground)]">000* *** 000</strong></span>
+                <button onclick="copyAppPassword()" class="text-indigo-500 hover:underline font-medium">Copy App Pass</button>
+              </div>
+            </div>
+
+            <!-- Live 2FA TOTP Authenticator Box -->
+            <div class="p-4 rounded-xl bg-[var(--content)] border border-indigo-500/30 space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-indigo-500 uppercase tracking-wider">Mã 2FA Authenticator (RFC 6238)</span>
+                <span class="text-xs font-bold tabular-nums px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)]" id="detailTotpCountdown">24s</span>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 bg-[var(--card)] px-3 py-2 rounded-lg border border-[var(--border)]">
+                <span id="detailTotpCode" class="font-mono text-2xl font-extrabold text-indigo-500 tracking-widest tabular-nums">482 915</span>
+                <button onclick="copySelectedTotp()" class="px-3 py-1.5 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition shrink-0">Copy 2FA</button>
+              </div>
+
+              <div class="space-y-1">
+                <div class="w-full bg-[var(--card)] h-1.5 rounded-full overflow-hidden">
+                  <div id="detailTotpProgressBar" class="bg-indigo-500 h-full transition-all duration-1000 ease-linear" style="width: 80%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+                  <span>Secret: <code id="detailSecretMask" class="text-[var(--foreground)]">JBSW••••3PXP</code></span>
+                  <button onclick="copySecretKey()" class="text-indigo-500 hover:underline">Copy Secret</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SUBSCRIPTIONS REGISTERED WITH THIS GMAIL -->
+        <div class="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
+                <span>Subscriptions Đang Gắn Với Gmail Này</span>
+                <span id="detailSubCountBadge" class="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-500/15 text-indigo-500">3 gói</span>
+              </h3>
+              <p class="text-xs text-[var(--muted-foreground)] mt-0.5">
+                Chi tiêu riêng hộp thư này: <strong id="detailSubTotalSpend" class="text-[var(--foreground)] tabular-nums">$32.98/tháng</strong>
+                <span id="detailSubTotalVnd" class="tabular-nums">(~838.000đ)</span>
+              </p>
+            </div>
+
+            <button onclick="openAddSubForCurrentGmail()" class="px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">+ Thêm Sub Cho Mail Này</button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-[var(--content)] border-b border-[var(--border)] text-[var(--muted-foreground)] uppercase font-semibold">
+                  <th class="py-2.5 px-4">Dịch Vụ / App</th>
+                  <th class="py-2.5 px-4">Đăng Nhập (SSO / Pass Riêng)</th>
+                  <th class="py-2.5 px-4 text-right">Giá</th>
+                  <th class="py-2.5 px-4">Hạn Gia Hạn</th>
+                  <th class="py-2.5 px-4 text-right">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="detailSubsTableBody" class="divide-y divide-[var(--border)]"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 2: GLOBAL SUBSCRIPTIONS OVERVIEW (ALL PERSONAL GMAILS)               -->
+  <!-- ========================================================================= -->
+  <main id="viewOverview" class="hidden max-w-7xl mx-auto px-6 py-6 flex-1 w-full space-y-6">
+
+    <!-- Filter Bar -->
+    <div class="bg-[var(--card)] p-4 rounded-2xl border border-[var(--border)] shadow-sm space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2" id="overviewGmailPills"></div>
+        <button onclick="openModal('addSubModal')" class="px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">+ Thêm Subscription</button>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[var(--border)]">
+        <div class="relative flex-1 min-w-[200px] max-w-sm">
+          <input id="overviewSearchInput" type="text" onkeyup="renderOverviewTable()" placeholder="Tìm dịch vụ, Gmail, thẻ thanh toán..." class="w-full px-3 py-1.5 text-xs rounded-lg bg-[var(--content)] border border-[var(--border)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="overviewCatSelect" onchange="renderOverviewTable()" class="text-xs bg-[var(--content)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-[var(--foreground)]">
+            <option value="all">Mọi danh mục</option>
+            <option value="AI">AI &amp; Công Cụ</option>
+            <option value="Media">Giải Trí &amp; Nhạc/Phim</option>
+            <option value="Dev">Học Tập &amp; Dev</option>
+            <option value="Storage">Lưu Trữ &amp; Tiện Ích</option>
+            <option value="Shopping">Mua Sắm / Giao Hàng</option>
+          </select>
+
+          <select id="overviewSortSelect" onchange="renderOverviewTable()" class="text-xs bg-[var(--content)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-[var(--foreground)]">
+            <option value="renewal-asc">Gia hạn: Sắp tới trước</option>
+            <option value="price-desc">Giá: Cao đến thấp</option>
+            <option value="name-asc">Tên: A - Z</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Subscriptions Table -->
+    <div class="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-[var(--content)] border-b border-[var(--border)] text-[var(--muted-foreground)] uppercase font-semibold">
+              <th class="py-3 px-4">Dịch Vụ &amp; Gói</th>
+              <th class="py-3 px-4">Gmail Đăng Ký &amp; Lấy Pass/2FA</th>
+              <th class="py-3 px-4 text-right">Chi Phí</th>
+              <th class="py-3 px-4">Hạn Gia Hạn</th>
+              <th class="py-3 px-4">Thẻ / Ví &amp; Biên Lai</th>
+              <th class="py-3 px-4 text-right">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="overviewTableBody" class="divide-y divide-[var(--border)]"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Personal Spend Breakdown -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-[var(--foreground)]">Chi Tiêu Theo Từng Gmail Cá Nhân</h3>
+        <div id="personalSpendBreakdown" class="space-y-3"></div>
+      </div>
+      <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-[var(--foreground)]">Nhắc Nhở Tránh Bị Trừ Tiền Oan</h3>
+        <div id="personalAlertsBox" class="space-y-2.5 text-xs"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: ADD NEW PERSONAL GMAIL + PASSWORD + 2FA -->
+  <div id="addGmailModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--card)] rounded-2xl max-w-md w-full border border-[var(--border)] p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-[var(--foreground)]">Thêm Gmail Cá Nhân + Bảo Mật 2FA</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">Dữ liệu được lưu cục bộ trên trình duyệt của bạn</p>
+        </div>
+        <button onclick="closeModal('addGmailModal')" class="p-1 rounded-lg hover:bg-[var(--content)] text-[var(--muted-foreground)]">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Địa chỉ Gmail *</label>
+          <input type="email" id="newGmailInput" placeholder="vd: tenban@gmail.com" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-[var(--foreground)] mb-1">Mật khẩu Gmail *</label>
+            <input type="text" id="newGmailPass" placeholder="Nhập mật khẩu..." class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-[var(--foreground)] mb-1">Phân loại</label>
+            <select id="newGmailTag" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+              <option value="Mail Chính|blue">Mail Chính</option>
+              <option value="AI & Công Cụ|purple">AI &amp; Công Cụ</option>
+              <option value="Giải Trí|amber">Giải Trí</option>
+              <option value="Học Tập / Dev|emerald">Học Tập / Dev</option>
+              <option value="Mua Sắm / Phụ|rose">Mua Sắm / Phụ</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-indigo-500 mb-1">2FA Secret Key (Google Authenticator Base32)</label>
+          <input type="text" id="newGmail2faSecret" placeholder="vd: JBSWY3DPEHPK3PXP (Bỏ trống nếu tự tạo mẫu)" class="w-full p-2.5 rounded-lg border border-indigo-500/40 bg-[var(--content)] text-[var(--foreground)] font-mono uppercase">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-[var(--foreground)] mb-1">Email khôi phục</label>
+            <input type="email" id="newGmailRecovery" placeholder="backup@gmail.com" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+          </div>
+          <div>
+            <label class="block font-semibold text-[var(--foreground)] mb-1">SĐT xác minh</label>
+            <input type="text" id="newGmailPhone" placeholder="000* *** 000" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Ghi chú cá nhân</label>
+          <input type="text" id="newGmailNote" placeholder="vd: Dùng cho Netflix &amp; YouTube..." class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+        </div>
+      </div>
+      <div class="pt-3 flex items-center justify-end gap-2 border-t border-[var(--border)]">
+        <button onclick="closeModal('addGmailModal')" class="px-4 py-2 text-xs font-medium text-[var(--muted-foreground)] hover:bg-[var(--content)] rounded-lg">Hủy</button>
+        <button onclick="saveNewGmailAccount()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Lưu Gmail &amp; 2FA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT CREDENTIALS -->
+  <div id="editCredsModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--card)] rounded-2xl max-w-md w-full border border-[var(--border)] p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+        <h3 class="text-sm font-bold text-[var(--foreground)]">Sửa Mật Khẩu &amp; 2FA</h3>
+        <button onclick="closeModal('editCredsModal')" class="p-1 rounded-lg hover:bg-[var(--content)] text-[var(--muted-foreground)]">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-[var(--muted-foreground)] mb-1">Tài khoản Gmail</label>
+          <input id="editEmailReadonly" type="text" readonly class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)] font-mono">
+        </div>
+        <div>
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Mật khẩu mới</label>
+          <input id="editPassInput" type="text" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] font-mono">
+        </div>
+        <div>
+          <label class="block font-semibold text-indigo-500 mb-1">2FA Secret Key (Base32)</label>
+          <input id="editSecretInput" type="text" class="w-full p-2.5 rounded-lg border border-indigo-500/40 bg-[var(--content)] text-[var(--foreground)] font-mono uppercase">
+        </div>
+        <div>
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Email khôi phục</label>
+          <input id="editRecoveryInput" type="text" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+        </div>
+        <div>
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Ghi chú</label>
+          <input id="editNoteInput" type="text" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+        </div>
+      </div>
+      <div class="pt-3 flex items-center justify-end gap-2">
+        <button onclick="closeModal('editCredsModal')" class="px-4 py-2 text-xs font-medium text-[var(--muted-foreground)] hover:bg-[var(--content)] rounded-lg">Hủy</button>
+        <button onclick="saveEditedCredentials()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BACKUP CODES -->
+  <div id="backupCodesModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--card)] rounded-2xl max-w-md w-full border border-[var(--border)] p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-[var(--foreground)]">8 Mã Dự Phòng 2FA</h3>
+          <p class="text-xs text-[var(--muted-foreground)]" id="backupEmailTitle"></p>
+        </div>
+        <button onclick="closeModal('backupCodesModal')" class="p-1 rounded-lg hover:bg-[var(--content)] text-[var(--muted-foreground)]">✕</button>
+      </div>
+      <div id="backupCodesGrid" class="grid grid-cols-2 gap-2.5 font-mono text-xs"></div>
+      <div class="flex items-center justify-end gap-2">
+        <button onclick="copyAllBackupCodes()" class="px-3.5 py-2 text-xs font-semibold bg-[var(--content)] border border-[var(--border)] text-[var(--foreground)] rounded-lg">Copy Tất Cả</button>
+        <button onclick="closeModal('backupCodesModal')" class="px-4 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-lg">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD SUBSCRIPTION -->
+  <div id="addSubModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--card)] rounded-2xl max-w-md w-full border border-[var(--border)] p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+        <h3 class="text-sm font-bold text-[var(--foreground)]">Thêm Gói Đăng Ký (Subscription)</h3>
+        <button onclick="closeModal('addSubModal')" class="p-1 rounded-lg hover:bg-[var(--content)] text-[var(--muted-foreground)]">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Tên Dịch Vụ / App *</label>
+          <input id="subNameInput" type="text" placeholder="vd: ChatGPT Plus, Netflix, iCloud+..." class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-[var(--foreground)] mb-1">Chi phí (USD/tháng) *</label>
+            <input id="subPriceInput" type="number" step="0.01" placeholder="10.00" class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+          </div>
+          <div>
+            <label class="block font-semibold text-[var(--foreground)] mb-1">Danh mục</label>
+            <select id="subCatInput" class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+              <option value="AI">AI &amp; Công Cụ</option>
+              <option value="Media">Giải Trí &amp; Nhạc/Phim</option>
+              <option value="Dev">Học Tập &amp; Dev</option>
+              <option value="Storage">Lưu Trữ &amp; Tiện Ích</option>
+              <option value="Shopping">Mua Sắm / Giao Hàng</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Đăng ký dưới Gmail</label>
+          <select id="subGmailSelect" class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]"></select>
+        </div>
+        <div>
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Kiểu đăng nhập vào App/Web</label>
+          <select id="subAuthModeSelect" onchange="toggleSubCustomPassField()" class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+            <option value="sso">Đăng nhập bằng Google (Dùng chung Pass + 2FA của Gmail)</option>
+            <option value="custom">Tạo mật khẩu riêng cho app/web này</option>
+          </select>
+        </div>
+        <div id="subCustomPassWrap" class="hidden">
+          <label class="block font-semibold text-[var(--foreground)] mb-1">Mật khẩu riêng của dịch vụ</label>
+          <input id="subCustomPassInput" type="text" placeholder="Nhập mật khẩu riêng..." class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-[var(--foreground)] mb-1">Ngày gia hạn kế tiếp</label>
+            <input id="subDateInput" type="date" value="2026-11-28" class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+          </div>
+          <div>
+            <label class="block font-semibold text-[var(--foreground)] mb-1">Thẻ / Ví thanh toán</label>
+            <input id="subCardInput" type="text" value="Ví MoMo" class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)]">
+          </div>
+        </div>
+      </div>
+      <div class="pt-2 flex items-center justify-end gap-2">
+        <button onclick="closeModal('addSubModal')" class="px-4 py-2 text-xs font-medium text-[var(--muted-foreground)] hover:bg-[var(--content)] rounded-lg">Hủy</button>
+        <button onclick="saveNewSubscription()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Lưu Gói</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK VAULT POPUP -->
+  <div id="quickVaultModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--card)] rounded-2xl max-w-md w-full border border-[var(--border)] p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-[var(--foreground)]" id="qvTitle">Lấy Nhanh Thông Tin Đăng Nhập</h3>
+          <p class="text-xs text-[var(--muted-foreground)]" id="qvEmail"></p>
+        </div>
+        <button onclick="closeModal('quickVaultModal')" class="p-1 rounded-lg hover:bg-[var(--content)] text-[var(--muted-foreground)]">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div class="p-3 rounded-xl bg-[var(--content)] border border-[var(--border)] flex items-center justify-between">
+          <div>
+            <div class="text-[var(--muted-foreground)]">Mật khẩu Gmail</div>
+            <div class="font-mono font-bold text-sm text-[var(--foreground)] mt-0.5" id="qvPass"></div>
+          </div>
+          <button onclick="copyQuickVaultPass()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg font-semibold">Copy Pass</button>
+        </div>
+        <div class="p-3 rounded-xl bg-[var(--content)] border border-indigo-500/30 flex items-center justify-between">
+          <div>
+            <div class="text-indigo-500 font-semibold">Mã 2FA Live (<span id="qvTimer" class="tabular-nums">24s</span>)</div>
+            <div class="font-mono font-extrabold text-xl text-indigo-500 tracking-widest mt-0.5 tabular-nums" id="qvTotp"></div>
+          </div>
+          <button onclick="copyQuickVaultTotp()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg font-semibold">Copy 2FA</button>
+        </div>
+        <div id="qvCustomPassBox" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+          <div>
+            <div class="text-amber-500 font-semibold">Mật khẩu riêng của app/web</div>
+            <div class="font-mono font-bold text-sm text-[var(--foreground)] mt-0.5" id="qvCustomPass"></div>
+          </div>
+          <button onclick="copyQuickCustomPass()" class="px-3 py-1.5 bg-amber-600 text-white rounded-lg font-semibold">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RECEIPT PREVIEW -->
+  <div id="receiptModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--card)] rounded-2xl max-w-lg w-full border border-[var(--border)] shadow-2xl overflow-hidden">
+      <div class="p-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--content)]">
+        <div>
+          <h3 class="font-bold text-sm text-[var(--foreground)]" id="modalServiceName">Biên Lai Email</h3>
+          <p class="text-xs text-[var(--muted-foreground)]" id="modalInvoiceId"></p>
+        </div>
+        <button onclick="closeModal('receiptModal')" class="p-1.5 rounded-lg hover:bg-[var(--secondary)] text-[var(--muted-foreground)]">✕</button>
+      </div>
+      <div class="p-5 space-y-4 text-xs">
+        <div class="bg-[var(--content)] p-3.5 rounded-xl space-y-2 border border-[var(--border)]">
+          <div class="flex justify-between"><span class="text-[var(--muted-foreground)]">Gmail nhận thông báo:</span><span class="font-semibold text-[var(--foreground)]" id="modalTargetGmail"></span></div>
+          <div class="flex justify-between"><span class="text-[var(--muted-foreground)]">Gia hạn tiếp theo:</span><span class="text-[var(--foreground)]" id="modalTimestamp"></span></div>
+          <div class="flex justify-between"><span class="text-[var(--muted-foreground)]">Thanh toán qua:</span><span class="text-[var(--foreground)]" id="modalPaymentMethod"></span></div>
+          <div class="flex justify-between"><span class="text-[var(--muted-foreground)]">Số tiền:</span><span class="font-bold text-indigo-500 text-sm" id="modalTotalPrice"></span></div>
+        </div>
+        <div class="flex justify-end">
+          <button onclick="closeModal('receiptModal')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BACKUP / EXPORT / IMPORT JSON -->
+  <div id="backupDataModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--card)] rounded-2xl max-w-md w-full border border-[var(--border)] p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+        <h3 class="text-sm font-bold text-[var(--foreground)]">Sao Lưu &amp; Khôi Phục Dữ Liệu Cục Bộ</h3>
+        <button onclick="closeModal('backupDataModal')" class="p-1 rounded-lg hover:bg-[var(--content)] text-[var(--muted-foreground)]">✕</button>
+      </div>
+      <p class="text-xs text-[var(--muted-foreground)]">Dữ liệu hiện tại được lưu tự động trong <code>localStorage</code> trình duyệt. Bạn có thể tải file JSON dự phòng hoặc nhập lại bất kỳ lúc nào.</p>
+      <div class="flex flex-col gap-2 text-xs">
+        <button onclick="exportJsonBackup()" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold">⬇️ Tải File Sao Lưu (.json)</button>
+        <label class="w-full py-2.5 px-4 bg-[var(--content)] hover:bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)] rounded-lg font-semibold text-center cursor-pointer">
+          ⬆️ Nhập File Sao Lưu (.json)
+          <input type="file" accept=".json" onchange="importJsonBackup(event)" class="hidden">
+        </label>
+        <button onclick="resetDemoData()" class="w-full py-2 px-4 text-rose-500 hover:bg-rose-500/10 rounded-lg font-medium mt-2">🔄 Khôi phục dữ liệu mẫu ban đầu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-indigo-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg">Thông báo</div>
+
+  <!-- APPLICATION SCRIPT WITH LOCALSTORAGE + REAL RFC 6238 TOTP -->
+  <script>
+    const VND_RATE = 25400;
+    const STORAGE_KEY = 'submail_personal_vault_v1';
+
+    // Dữ liệu mẫu của prototype. Toàn bộ giá trị đều là giả và không trông
+    // giống thông tin thật: ứng dụng desktop không đóng gói dữ liệu mẫu nào.
+    const defaultGmailAccounts = [
+      {
+        email: "vi-du-1@example.com",
+        tag: "Mail Chính",
+        color: "blue",
+        initials: "VD",
+        password: "MAT-KHAU-MINH-HOA-1",
+        secret2fa: "DEMO2FAKEY00000001",
+        recoveryEmail: "vi-du-1-backup@example.com",
+        phone: "000* *** 000",
+        appPassword: "demo app password 1",
+        note: "Ví dụ: Gmail chính liên kết Apple ID, Google One, ChatGPT",
+        backupCodes: ["0000 1111", "2222 3333", "4444 5555", "6666 7777", "8888 9999", "1111 0000", "3333 2222", "5555 4444"]
+      },
+      {
+        email: "vi-du-2@example.com",
+        tag: "Giải Trí",
+        color: "amber",
+        initials: "VD",
+        password: "MAT-KHAU-MINH-HOA-2",
+        secret2fa: "DEMO2FAKEY00000002",
+        recoveryEmail: "vi-du-1@example.com",
+        phone: "000* *** 000",
+        appPassword: "Chưa tạo",
+        note: "Ví dụ: dùng đăng ký Netflix, Spotify, YouTube Premium",
+        backupCodes: ["0000 2222", "4444 6666", "8888 0000", "2222 4444", "6666 8888", "1111 2222", "3333 4444", "5555 6666"]
+      },
+      {
+        email: "vi-du-3@example.com",
+        tag: "AI & Công Cụ",
+        color: "purple",
+        initials: "VD",
+        password: "MAT-KHAU-MINH-HOA-3",
+        secret2fa: "DEMO2FAKEY00000003",
+        recoveryEmail: "vi-du-1@example.com",
+        phone: "000* *** 000",
+        appPassword: "demo app password 3",
+        note: "Ví dụ: tài khoản chuyên đăng ký các công cụ AI & Thiết kế",
+        backupCodes: ["1111 2222", "3333 4444", "5555 6666", "7777 8888", "9999 0000", "0000 1111", "2222 3333", "4444 5555"]
+      },
+      {
+        email: "vi-du-4@example.com",
+        tag: "Học Tập / Dev",
+        color: "emerald",
+        initials: "VD",
+        password: "MAT-KHAU-MINH-HOA-4",
+        secret2fa: "DEMO2FAKEY00000004",
+        recoveryEmail: "vi-du-1@example.com",
+        phone: "000* *** 000",
+        appPassword: "demo app password 4",
+        note: "Ví dụ: dùng cho GitHub, Cursor, Notion, khóa học online",
+        backupCodes: ["2222 3333", "4444 5555", "6666 7777", "8888 9999", "0000 1111", "1111 2222", "2222 3333", "3333 4444"]
+      },
+      {
+        email: "vi-du-5@example.com",
+        tag: "Mua Sắm / Phụ",
+        color: "rose",
+        initials: "VD",
+        password: "MAT-KHAU-MINH-HOA-5",
+        secret2fa: "DEMO2FAKEY00000005",
+        recoveryEmail: "vi-du-1@example.com",
+        phone: "000* *** 000",
+        appPassword: "Chưa tạo",
+        note: "Ví dụ: mail phụ nhận hóa đơn mua hàng, gói hội viên giao đồ",
+        backupCodes: ["3333 4444", "5555 6666", "7777 8888", "9999 0000", "1111 2222", "2222 3333", "3333 4444", "4444 5555"]
+      }
+    ];
+
+    const defaultSubscriptions = [
+      { id: 1, name: "ChatGPT Plus", plan: "Gói cá nhân GPT-4o", category: "AI", gmail: "vi-du-1@example.com", price: 20.00, cycle: "tháng", nextDate: "2026-11-15", nextText: "Còn 3 ngày", urgency: "warning", payment: "Mastercard •••• 1092", receiptId: "OAI-9982", status: "active", authMode: "sso", customPass: "", iconBg: "bg-emerald-600", iconText: "GPT" },
+      { id: 2, name: "Google One 2TB", plan: "Drive + Google Photos", category: "Storage", gmail: "vi-du-1@example.com", price: 9.99, cycle: "tháng", nextDate: "2026-12-07", nextText: "Còn 25 ngày", urgency: "normal", payment: "Ví MoMo", receiptId: "G1-9014", status: "active", authMode: "sso", customPass: "", iconBg: "bg-blue-600", iconText: "G1" },
+      { id: 3, name: "iCloud+ 200GB", plan: "Sao lưu iPhone & Ảnh", category: "Storage", gmail: "vi-du-1@example.com", price: 2.99, cycle: "tháng", nextDate: "2026-11-26", nextText: "Còn 14 ngày", urgency: "normal", payment: "Apple Pay (MoMo)", receiptId: "APL-4421", status: "active", authMode: "custom", customPass: "MAT-KHAU-MINH-HOA-APPLE", iconBg: "bg-sky-600", iconText: "iC" },
+      { id: 4, name: "Netflix Premium 4K", plan: "Gói Ultra HD 4 thiết bị", category: "Media", gmail: "vi-du-2@example.com", price: 10.50, cycle: "tháng", nextDate: "2026-11-17", nextText: "Còn 5 ngày", urgency: "warning", payment: "Visa •••• 8821", receiptId: "NFLX-1192", status: "active", authMode: "custom", customPass: "MAT-KHAU-MINH-HOA-NFLX", iconBg: "bg-red-700", iconText: "N" },
+      { id: 5, name: "Spotify Premium", plan: "Nghe nhạc không quảng cáo", category: "Media", gmail: "vi-du-2@example.com", price: 2.50, cycle: "tháng", nextDate: "2026-11-21", nextText: "Còn 9 ngày", urgency: "normal", payment: "Ví ZaloPay", receiptId: "SPOT-4402", status: "active", authMode: "custom", customPass: "MAT-KHAU-MINH-HOA-SPOT", iconBg: "bg-green-600", iconText: "Sp" },
+      { id: 6, name: "YouTube Premium", plan: "Xem video không quảng cáo", category: "Media", gmail: "vi-du-2@example.com", price: 3.20, cycle: "tháng", nextDate: "2026-12-09", nextText: "Còn 27 ngày", urgency: "normal", payment: "Ví MoMo", receiptId: "YT-9081", status: "active", authMode: "sso", customPass: "", iconBg: "bg-red-500", iconText: "YT" },
+      { id: 7, name: "Claude Pro", plan: "Anthropic Sonnet / Opus", category: "AI", gmail: "vi-du-3@example.com", price: 20.00, cycle: "tháng", nextDate: "2026-11-24", nextText: "Còn 12 ngày", urgency: "normal", payment: "Visa •••• 4242", receiptId: "ANT-3310", status: "active", authMode: "sso", customPass: "", iconBg: "bg-amber-600", iconText: "CL" },
+      { id: 8, name: "Canva Pro (Trial)", plan: "Dùng thử 30 ngày", category: "AI", gmail: "vi-du-3@example.com", price: 12.99, cycle: "tháng", nextDate: "2026-11-14", nextText: "Hết Trial sau 48h", urgency: "urgent", payment: "Mastercard •••• 1092", receiptId: "CNV-0192", status: "trial", authMode: "sso", customPass: "", iconBg: "bg-teal-600", iconText: "Cv" },
+      { id: 9, name: "Midjourney Basic", plan: "Tạo ảnh AI cá nhân", category: "AI", gmail: "vi-du-3@example.com", price: 10.00, cycle: "tháng", nextDate: "2026-11-28", nextText: "Còn 16 ngày", urgency: "normal", payment: "Visa •••• 4242", receiptId: "MJ-8812", status: "active", authMode: "custom", customPass: "MAT-KHAU-MINH-HOA-DISCORD", iconBg: "bg-indigo-700", iconText: "MJ" },
+      { id: 10, name: "Cursor Pro", plan: "AI Code Editor cá nhân", category: "Dev", gmail: "vi-du-4@example.com", price: 20.00, cycle: "tháng", nextDate: "2026-11-13", nextText: "Ngày mai (24h)", urgency: "urgent", payment: "Visa •••• 4242", receiptId: "CSR-9102", status: "active", authMode: "sso", customPass: "", iconBg: "bg-slate-900", iconText: "Cr" },
+      { id: 11, name: "GitHub Copilot", plan: "Hỗ trợ viết code", category: "Dev", gmail: "vi-du-4@example.com", price: 10.00, cycle: "tháng", nextDate: "2026-11-27", nextText: "Còn 15 ngày", urgency: "normal", payment: "Visa •••• 4242", receiptId: "GH-7761", status: "active", authMode: "custom", customPass: "MAT-KHAU-MINH-HOA-GITHUB", iconBg: "bg-zinc-800", iconText: "GH" },
+      { id: 12, name: "Notion Plus", plan: "Ghi chú & quản lý cá nhân", category: "Storage", gmail: "vi-du-4@example.com", price: 10.00, cycle: "tháng", nextDate: "2026-11-22", nextText: "Còn 10 ngày", urgency: "normal", payment: "Visa •••• 4242", receiptId: "NOT-8812", status: "active", authMode: "sso", customPass: "", iconBg: "bg-neutral-800", iconText: "N" },
+      { id: 13, name: "GrabUnlimited", plan: "Freeship đồ ăn & đi lại", category: "Shopping", gmail: "vi-du-5@example.com", price: 2.00, cycle: "tháng", nextDate: "2026-11-19", nextText: "Còn 7 ngày", urgency: "normal", payment: "Ví MoMo", receiptId: "GRB-2291", status: "active", authMode: "sso", customPass: "", iconBg: "bg-emerald-700", iconText: "Gr" },
+      { id: 14, name: "ShopeeVIP", plan: "Voucher freeship hàng tháng", category: "Shopping", gmail: "vi-du-5@example.com", price: 2.28, cycle: "tháng", nextDate: "2026-11-25", nextText: "Còn 13 ngày", urgency: "normal", payment: "ShopeePay", receiptId: "SHP-5510", status: "active", authMode: "custom", customPass: "MAT-KHAU-MINH-HOA-SHOPEE", iconBg: "bg-orange-600", iconText: "Sh" }
+    ];
+
+    let gmailAccounts = [];
+    let subscriptionsData = [];
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          gmailAccounts = parsed.gmailAccounts || structuredClone(defaultGmailAccounts);
+          subscriptionsData = parsed.subscriptionsData || structuredClone(defaultSubscriptions);
+          return;
+        }
+      } catch (e) {}
+      gmailAccounts = structuredClone(defaultGmailAccounts);
+      subscriptionsData = structuredClone(defaultSubscriptions);
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ gmailAccounts, subscriptionsData }));
+      } catch (e) {}
+    }
+
+    loadState();
+
+    let selectedGmail = gmailAccounts[0]?.email || "";
+    let vaultTagFilter = 'all';
+    let overviewGmailFilter = 'all';
+    let showDetailPassword = false;
+    let vaultLocked = false;
+    let quickVaultTarget = null;
+    let currentTotpCache = {};
+
+    const badgeBgMap = { purple: "bg-purple-600", blue: "bg-blue-600", emerald: "bg-emerald-600", amber: "bg-amber-600", rose: "bg-rose-600" };
+    const pillStyleMap = {
+      purple: "bg-purple-500/15 text-purple-500 border-purple-500/30",
+      blue: "bg-blue-500/15 text-blue-500 border-blue-500/30",
+      emerald: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
+      amber: "bg-amber-500/15 text-amber-500 border-amber-500/30",
+      rose: "bg-rose-500/15 text-rose-500 border-rose-500/30"
+    };
+    const barColorMap = { purple: "bg-purple-500", blue: "bg-blue-500", emerald: "bg-emerald-500", amber: "bg-amber-500", rose: "bg-rose-500" };
+
+    function formatVnd(usd) {
+      return Math.round(usd * VND_RATE).toLocaleString('vi-VN') + 'đ';
+    }
+
+    // REAL RFC 6238 TOTP (HMAC-SHA1 via Web Crypto API)
+    function base32ToBytes(base32) {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+      const cleaned = (base32 || "").toUpperCase().replace(/[^A-Z2-7]/g, "");
+      let bits = 0, value = 0, output = [];
+      for (let i = 0; i < cleaned.length; i++) {
+        const idx = alphabet.indexOf(cleaned[i]);
+        if (idx === -1) continue;
+        value = (value << 5) | idx;
+        bits += 5;
+        if (bits >= 8) {
+          output.push((value >>> (bits - 8)) & 255);
+          bits -= 8;
+        }
+      }
+      return new Uint8Array(output);
+    }
+
+    async function computeTotp(secret) {
+      const timeStep = Math.floor(Date.now() / 30000);
+      const cacheKey = `${secret}:${timeStep}`;
+      if (currentTotpCache[cacheKey]) return currentTotpCache[cacheKey];
+
+      try {
+        if (window.crypto?.subtle) {
+          const keyBytes = base32ToBytes(secret);
+          if (keyBytes.length > 0) {
+            const counter = new ArrayBuffer(8);
+            const view = new DataView(counter);
+            view.setUint32(4, timeStep, false);
+            const cryptoKey = await crypto.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
+            const hmac = new Uint8Array(await crypto.subtle.sign("HMAC", cryptoKey, counter));
+            const offset = hmac[hmac.length - 1] & 0x0f;
+            const binCode = ((hmac[offset] & 0x7f) << 24) |
+                            ((hmac[offset + 1] & 0xff) << 16) |
+                            ((hmac[offset + 2] & 0xff) << 8) |
+                            (hmac[offset + 3] & 0xff);
+            const otp = String(binCode % 1000000).padStart(6, "0");
+            const formatted = otp.slice(0, 3) + " " + otp.slice(3);
+            currentTotpCache[cacheKey] = formatted;
+            return formatted;
+          }
+        }
+      } catch (e) {}
+
+      // Fallback deterministic hash if non-HTTPS or crypto unavailable
+      let hash = 0;
+      for (let i = 0; i < cacheKey.length; i++) {
+        hash = ((hash << 5) - hash) + cacheKey.charCodeAt(i);
+        hash |= 0;
+      }
+      const otp = String(Math.abs(hash) % 1000000).padStart(6, "0");
+      return otp.slice(0, 3) + " " + otp.slice(3);
+    }
+
+    function getRemainingSeconds() {
+      return 30 - (Math.floor(Date.now() / 1000) % 30);
+    }
+
+    async function tickTotp() {
+      const rem = getRemainingSeconds();
+      const pct = (rem / 30) * 100;
+      document.getElementById('globalTotpTimer').innerText = `${rem}s`;
+
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (acc) {
+        const codeEl = document.getElementById('detailTotpCode');
+        const timerEl = document.getElementById('detailTotpCountdown');
+        const barEl = document.getElementById('detailTotpProgressBar');
+
+        timerEl.innerText = `${rem}s`;
+        barEl.style.width = `${pct}%`;
+
+        if (rem <= 5) {
+          barEl.className = "bg-rose-500 h-full transition-all duration-1000 ease-linear";
+          timerEl.className = "text-xs font-bold tabular-nums px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30";
+        } else {
+          barEl.className = "bg-indigo-500 h-full transition-all duration-1000 ease-linear";
+          timerEl.className = "text-xs font-bold tabular-nums px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]";
+        }
+
+        codeEl.innerText = vaultLocked ? "••• •••" : await computeTotp(acc.secret2fa);
+      }
+
+      if (quickVaultTarget) {
+        const qAcc = gmailAccounts.find(a => a.email === quickVaultTarget.gmail);
+        if (qAcc) {
+          document.getElementById('qvTimer').innerText = `${rem}s`;
+          document.getElementById('qvTotp').innerText = vaultLocked ? "••• •••" : await computeTotp(qAcc.secret2fa);
+        }
+      }
+    }
+
+    setInterval(tickTotp, 1000);
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
+    }
+
+    function switchMainView(view) {
+      const vVault = document.getElementById('viewVault');
+      const vOverview = document.getElementById('viewOverview');
+      const btnVault = document.getElementById('tabBtnVault');
+      const btnOverview = document.getElementById('tabBtnOverview');
+
+      if (view === 'vault') {
+        vVault.classList.remove('hidden');
+        vOverview.classList.add('hidden');
+        btnVault.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition flex items-center gap-1.5";
+        btnOverview.className = "px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition flex items-center gap-1.5";
+      } else {
+        vVault.classList.add('hidden');
+        vOverview.classList.remove('hidden');
+        btnOverview.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition flex items-center gap-1.5";
+        btnVault.className = "px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition flex items-center gap-1.5";
+        renderOverviewPills();
+        renderOverviewTable();
+        renderPersonalBreakdown();
+        renderPersonalAlerts();
+      }
+    }
+
+    function toggleVaultLock() {
+      vaultLocked = !vaultLocked;
+      if (vaultLocked) showDetailPassword = false;
+      const btn = document.getElementById('vaultLockBtn');
+      const text = document.getElementById('vaultLockText');
+      if (vaultLocked) {
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition bg-rose-500/15 text-rose-500 border-rose-500/30";
+        text.innerText = "🔒 Két Đang Khóa";
+        showToast("Đã khóa Két — Mật khẩu & mã 2FA đã được che.");
+      } else {
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition bg-emerald-500/10 text-emerald-500 border-emerald-500/30";
+        text.innerText = "🔓 Két Đang Mở";
+        showToast("Đã mở khóa Két.");
+      }
+      renderVaultDetail();
+      tickTotp();
+    }
+
+    function updateGlobalStrip() {
+      const activeSubs = subscriptionsData.filter(s => s.status !== 'paused');
+      const total = activeSubs.reduce((sum, s) => sum + s.price, 0);
+      const expiring = activeSubs.filter(s => s.urgency === 'urgent' || s.urgency === 'warning').length;
+      document.getElementById('stripTotalGmails').innerText = gmailAccounts.length;
+      document.getElementById('stripTotalSubs').innerText = activeSubs.length;
+      document.getElementById('stripTotalCost').innerText = `$${total.toFixed(2)}/tháng`;
+      document.getElementById('stripTotalVnd').innerText = `(~${formatVnd(total)}/tháng)`;
+      document.getElementById('stripExpiringAlert').innerText = `⏰ ${expiring} gói sắp gia hạn`;
+    }
+
+    function setVaultTagFilter(tag) {
+      vaultTagFilter = tag;
+      document.querySelectorAll('.vtag-btn').forEach(b => {
+        if (b.getAttribute('data-vtag') === tag) {
+          b.className = "vtag-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white whitespace-nowrap";
+        } else {
+          b.className = "vtag-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--content)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] whitespace-nowrap";
+        }
+      });
+      renderVaultAccountList();
+    }
+
+    function renderVaultAccountList() {
+      const search = document.getElementById('vaultSearchGmail').value.toLowerCase().trim();
+      const container = document.getElementById('vaultAccountList');
+
+      const filtered = gmailAccounts.filter(acc => {
+        if (vaultTagFilter !== 'all' && acc.tag !== vaultTagFilter) return false;
+        if (search) {
+          return acc.email.toLowerCase().includes(search) ||
+                 acc.tag.toLowerCase().includes(search) ||
+                 acc.note.toLowerCase().includes(search);
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-xs text-[var(--muted-foreground)]">Không tìm thấy Gmail nào.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(acc => {
+        const subs = subscriptionsData.filter(s => s.gmail === acc.email && s.status !== 'paused');
+        const spend = subs.reduce((sum, s) => sum + s.price, 0);
+        const isSelected = acc.email === selectedGmail;
+        const avatarBg = badgeBgMap[acc.color] || "bg-indigo-600";
+        const pillCls = pillStyleMap[acc.color] || pillStyleMap.blue;
+
+        return `
+          <button onclick="selectVaultAccount('${acc.email}')" class="w-full text-left p-3.5 transition flex items-start justify-between gap-3 ${isSelected ? 'bg-indigo-500/10 border-l-4 border-l-indigo-600' : 'hover:bg-[var(--content)] border-l-4 border-l-transparent'}">
+            <div class="flex items-start gap-3 min-w-0">
+              <div class="w-9 h-9 rounded-xl ${avatarBg} text-white flex items-center justify-center font-bold text-xs shrink-0">
+                ${acc.initials}
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-[var(--foreground)] font-mono truncate">${acc.email}</div>
+                <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                  <span class="px-2 py-0.5 rounded-full text-xs font-medium border ${pillCls}">${acc.tag}</span>
+                  <span class="text-xs text-emerald-500 font-semibold">2FA ON</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-xs font-bold text-[var(--foreground)] tabular-nums">$${spend.toFixed(2)}</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5">${subs.length} gói</div>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectVaultAccount(email) {
+      selectedGmail = email;
+      showDetailPassword = false;
+      renderVaultAccountList();
+      renderVaultDetail();
+      tickTotp();
+    }
+
+    function renderVaultDetail() {
+      const acc = gmailAccounts.find(a => a.email === selectedGmail) || gmailAccounts[0];
+      if (!acc) return;
+      selectedGmail = acc.email;
+
+      const avatarBg = badgeBgMap[acc.color] || "bg-indigo-600";
+      const pillCls = pillStyleMap[acc.color] || pillStyleMap.blue;
+
+      const avatarEl = document.getElementById('detailAvatar');
+      avatarEl.className = `w-12 h-12 rounded-2xl ${avatarBg} text-white flex items-center justify-center font-bold text-base shadow-sm`;
+      avatarEl.innerText = acc.initials;
+
+      document.getElementById('detailEmail').innerText = acc.email;
+      const tagBadge = document.getElementById('detailTagBadge');
+      tagBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-semibold border ${pillCls}`;
+      tagBadge.innerText = acc.tag;
+
+      document.getElementById('detailRecoveryDisplay').innerText = `Khôi phục: ${acc.recoveryEmail}`;
+      document.getElementById('detailNoteDisplay').innerText = acc.note || "Không có ghi chú";
+      document.getElementById('detailPhoneDisplay').innerText = acc.phone;
+
+      document.getElementById('detailPasswordText').innerText = (vaultLocked || !showDetailPassword) ? "••••••••••••••" : acc.password;
+
+      const sec = acc.secret2fa || "NONE";
+      document.getElementById('detailSecretMask').innerText = vaultLocked ? "••••••••••••" : `${sec.slice(0, 4)}••••${sec.slice(-4)}`;
+
+      const subs = subscriptionsData.filter(s => s.gmail === acc.email);
+      const activeSubs = subs.filter(s => s.status !== 'paused');
+      const totalSpend = activeSubs.reduce((sum, s) => sum + s.price, 0);
+
+      document.getElementById('detailSubCountBadge').innerText = `${activeSubs.length} gói đang chạy`;
+      document.getElementById('detailSubTotalSpend').innerText = `$${totalSpend.toFixed(2)}/tháng`;
+      document.getElementById('detailSubTotalVnd').innerText = `(~${formatVnd(totalSpend)})`;
+
+      const tbody = document.getElementById('detailSubsTableBody');
+      if (subs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-xs text-[var(--muted-foreground)]">Gmail này chưa có gói nào. Nhấn "+ Thêm Sub Cho Mail Này" để thêm.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = subs.map(sub => {
+        const authHtml = sub.authMode === 'sso'
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-indigo-500/10 text-indigo-500 border border-indigo-500/30">Google SSO</span>`
+          : `<div class="flex items-center gap-1.5">
+               <span class="font-mono text-xs bg-[var(--content)] px-2 py-0.5 rounded border border-[var(--border)]">${vaultLocked ? '••••••' : sub.customPass}</span>
+               <button onclick="copyString('${sub.customPass}', 'Đã copy mật khẩu riêng của ${sub.name}')" class="text-xs text-indigo-500 hover:underline">Copy</button>
+             </div>`;
+
+        let urgencyHtml = `<span class="text-xs text-[var(--muted-foreground)]">${sub.nextText}</span>`;
+        if (sub.status === 'paused') urgencyHtml = `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-500/20 text-[var(--muted-foreground)]">Đã hủy</span>`;
+        else if (sub.urgency === 'urgent') urgencyHtml = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500/15 text-rose-500 border border-rose-500/30">${sub.nextText}</span>`;
+        else if (sub.urgency === 'warning') urgencyHtml = `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/30">${sub.nextText}</span>`;
+
+        return `
+          <tr class="hover:bg-[var(--content)] transition ${sub.status === 'paused' ? 'opacity-50' : ''}">
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg ${sub.iconBg} text-white flex items-center justify-center font-bold text-xs shrink-0">${sub.iconText}</div>
+                <div>
+                  <div class="font-bold text-[var(--foreground)]">${sub.name}</div>
+                  <div class="text-xs text-[var(--muted-foreground)]">${sub.plan}</div>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-4">${authHtml}</td>
+            <td class="py-3 px-4 text-right font-bold tabular-nums text-[var(--foreground)]">
+              <div>$${sub.price.toFixed(2)}<span class="text-xs font-normal text-[var(--muted-foreground)]">/${sub.cycle}</span></div>
+              <div class="text-xs font-normal text-[var(--muted-foreground)]">~${formatVnd(sub.price)}</div>
+            </td>
+            <td class="py-3 px-4">
+              <div>${urgencyHtml}</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5">${sub.nextDate}</div>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="previewReceiptModal('${sub.name}', '$${sub.price.toFixed(2)} (~${formatVnd(sub.price)})', '${sub.receiptId}', '${sub.gmail}', '${sub.payment}', '${sub.nextDate}')" class="px-2 py-1 text-xs bg-[var(--content)] border border-[var(--border)] rounded-lg hover:bg-[var(--secondary)]">Biên lai</button>
+                ${sub.status !== 'paused'
+                  ? `<button onclick="toggleSubPause(${sub.id})" class="px-2 py-1 text-xs text-rose-500 border border-rose-500/30 rounded-lg hover:bg-rose-500/10">Hủy</button>`
+                  : `<button onclick="toggleSubPause(${sub.id})" class="px-2 py-1 text-xs text-emerald-500 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/10">Mở lại</button>`
+                }
+                <button onclick="deleteSub(${sub.id})" class="px-1.5 py-1 text-xs text-[var(--muted-foreground)] hover:text-rose-500" title="Xóa hẳn">✕</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleDetailPassword() {
+      if (vaultLocked) { showToast("Hãy mở khóa Két ở góc trên bên phải trước!"); return; }
+      showDetailPassword = !showDetailPassword;
+      renderVaultDetail();
+    }
+
+    function copySelectedPassword() {
+      if (vaultLocked) { showToast("Két đang khóa!"); return; }
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (acc) copyString(acc.password, `Đã sao chép mật khẩu của ${acc.email}`);
+    }
+
+    async function copySelectedTotp() {
+      if (vaultLocked) { showToast("Két đang khóa!"); return; }
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (acc) {
+        const code = (await computeTotp(acc.secret2fa)).replace(/\s/g, '');
+        copyString(code, `Đã sao chép mã 2FA: ${code}`);
+      }
+    }
+
+    function copySecretKey() {
+      if (vaultLocked) { showToast("Két đang khóa!"); return; }
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (acc) copyString(acc.secret2fa, "Đã sao chép Secret Key 2FA");
+    }
+
+    function copyAppPassword() {
+      if (vaultLocked) { showToast("Két đang khóa!"); return; }
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (acc) copyString(acc.appPassword, `App Password: ${acc.appPassword}`);
+    }
+
+    function deleteSelectedGmail() {
+      if (gmailAccounts.length <= 1) { showToast("Cần giữ lại ít nhất 1 tài khoản Gmail!"); return; }
+      if (!confirm(`Xóa tài khoản ${selectedGmail} và các gói đăng ký của nó?`)) return;
+      gmailAccounts = gmailAccounts.filter(a => a.email !== selectedGmail);
+      subscriptionsData = subscriptionsData.filter(s => s.gmail !== selectedGmail);
+      selectedGmail = gmailAccounts[0].email;
+      saveState();
+      refreshAll();
+      showToast("Đã xóa tài khoản Gmail!");
+    }
+
+    function toggleSubPause(id) {
+      const sub = subscriptionsData.find(s => s.id === id);
+      if (sub) {
+        sub.status = sub.status === 'paused' ? 'active' : 'paused';
+        saveState();
+        refreshAll();
+        showToast(sub.status === 'paused' ? `Đã hủy gia hạn ${sub.name}` : `Đã kích hoạt lại ${sub.name}`);
+      }
+    }
+
+    function deleteSub(id) {
+      subscriptionsData = subscriptionsData.filter(s => s.id !== id);
+      saveState();
+      refreshAll();
+      showToast("Đã xóa subscription.");
+    }
+
+    function openEditCredentialsModal() {
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (!acc) return;
+      document.getElementById('editEmailReadonly').value = acc.email;
+      document.getElementById('editPassInput').value = acc.password;
+      document.getElementById('editSecretInput').value = acc.secret2fa;
+      document.getElementById('editRecoveryInput').value = acc.recoveryEmail;
+      document.getElementById('editNoteInput').value = acc.note;
+      openModal('editCredsModal');
+    }
+
+    function saveEditedCredentials() {
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (!acc) return;
+      acc.password = document.getElementById('editPassInput').value.trim() || acc.password;
+      acc.secret2fa = document.getElementById('editSecretInput').value.trim().replace(/\s/g, '').toUpperCase() || acc.secret2fa;
+      acc.recoveryEmail = document.getElementById('editRecoveryInput').value.trim();
+      acc.note = document.getElementById('editNoteInput').value.trim();
+      closeModal('editCredsModal');
+      saveState();
+      refreshAll();
+      showToast(`Đã cập nhật Mật khẩu & 2FA cho ${acc.email}`);
+    }
+
+    function openBackupCodesModal() {
+      if (vaultLocked) { showToast("Mở khóa Két để xem mã dự phòng!"); return; }
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (!acc) return;
+      document.getElementById('backupEmailTitle').innerText = acc.email;
+      document.getElementById('backupCodesGrid').innerHTML = acc.backupCodes.map((c, idx) => `
+        <div onclick="copyString('${c}', 'Đã copy mã dự phòng ${c}')" class="p-2.5 rounded-lg bg-[var(--content)] border border-[var(--border)] flex items-center justify-between cursor-pointer hover:border-indigo-500">
+          <span class="text-[var(--muted-foreground)]">#${idx + 1}</span>
+          <span class="font-bold text-[var(--foreground)]">${c}</span>
+        </div>
+      `).join('');
+      openModal('backupCodesModal');
+    }
+
+    function copyAllBackupCodes() {
+      const acc = gmailAccounts.find(a => a.email === selectedGmail);
+      if (acc) copyString(acc.backupCodes.join('\n'), "Đã sao chép toàn bộ 8 mã dự phòng!");
+    }
+
+    function saveNewGmailAccount() {
+      const email = document.getElementById('newGmailInput').value.trim();
+      const pass = document.getElementById('newGmailPass').value.trim();
+      const [tag, color] = document.getElementById('newGmailTag').value.split('|');
+      let secret = document.getElementById('newGmail2faSecret').value.trim().replace(/\s/g, '').toUpperCase();
+      const recovery = document.getElementById('newGmailRecovery').value.trim() || "Chưa cài đặt";
+      const phone = document.getElementById('newGmailPhone').value.trim() || "Chưa liên kết";
+      const note = document.getElementById('newGmailNote').value.trim() || "Tài khoản Gmail cá nhân";
+
+      if (!email || !email.includes('@')) { showToast("Vui lòng nhập Gmail hợp lệ!"); return; }
+      if (!pass) { showToast("Vui lòng nhập mật khẩu!"); return; }
+      if (gmailAccounts.some(a => a.email === email)) { showToast("Gmail này đã có trong danh sách!"); return; }
+      if (!secret) secret = "JBSWY3DPEHPK3PXP";
+
+      gmailAccounts.unshift({
+        email, tag, color,
+        initials: email.substring(0, 2).toUpperCase(),
+        password: pass, secret2fa: secret, recoveryEmail: recovery, phone,
+        appPassword: "Chưa tạo", note,
+        backupCodes: ["1122 4433", "5566 8877", "9900 2211", "3344 6655", "7788 0099", "1234 8765", "4321 5678", "9876 5432"]
+      });
+
+      selectedGmail = email;
+      document.getElementById('newGmailInput').value = '';
+      document.getElementById('newGmailPass').value = '';
+      document.getElementById('newGmail2faSecret').value = '';
+      closeModal('addGmailModal');
+      saveState();
+      refreshAll();
+      showToast(`Đã thêm ${email} kèm 2FA!`);
+    }
+
+    function openAddSubForCurrentGmail() {
+      populateSubGmailSelect();
+      document.getElementById('subGmailSelect').value = selectedGmail;
+      openModal('addSubModal');
+    }
+
+    function populateSubGmailSelect() {
+      document.getElementById('subGmailSelect').innerHTML = gmailAccounts.map(a => `<option value="${a.email}">${a.email} (${a.tag})</option>`).join('');
+    }
+
+    function toggleSubCustomPassField() {
+      document.getElementById('subCustomPassWrap').classList.toggle('hidden', document.getElementById('subAuthModeSelect').value === 'sso');
+    }
+
+    function saveNewSubscription() {
+      const name = document.getElementById('subNameInput').value.trim();
+      const price = parseFloat(document.getElementById('subPriceInput').value) || 0;
+      const category = document.getElementById('subCatInput').value;
+      const gmail = document.getElementById('subGmailSelect').value;
+      const authMode = document.getElementById('subAuthModeSelect').value;
+      const customPass = document.getElementById('subCustomPassInput').value.trim();
+      const nextDate = document.getElementById('subDateInput').value || '2026-11-30';
+      const payment = document.getElementById('subCardInput').value.trim() || 'Ví MoMo';
+
+      if (!name || price <= 0) { showToast("Vui lòng nhập tên dịch vụ và giá!"); return; }
+
+      subscriptionsData.unshift({
+        id: Date.now(), name, plan: `${category} • Cá nhân`, category, gmail, price,
+        cycle: "tháng", nextDate, nextText: "Sắp tới", urgency: "normal", payment,
+        receiptId: `SUB-${Math.floor(1000 + Math.random() * 9000)}`, status: "active",
+        authMode, customPass: authMode === 'custom' ? (customPass || "Pass#12345") : "",
+        iconBg: "bg-indigo-600", iconText: name.substring(0, 2).toUpperCase()
+      });
+
+      selectedGmail = gmail;
+      document.getElementById('subNameInput').value = '';
+      document.getElementById('subPriceInput').value = '';
+      closeModal('addSubModal');
+      saveState();
+      refreshAll();
+      showToast(`Đã thêm ${name} vào ${gmail}`);
+    }
+
+    function renderOverviewPills() {
+      const container = document.getElementById('overviewGmailPills');
+      let html = `<button onclick="setOverviewGmail('all')" class="px-3 py-1.5 rounded-xl text-xs font-semibold ${overviewGmailFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-[var(--content)] text-[var(--foreground)] border border-[var(--border)]'}">Tất cả Gmail (${gmailAccounts.length})</button>`;
+      gmailAccounts.forEach(acc => {
+        const isAct = overviewGmailFilter === acc.email;
+        html += `<button onclick="setOverviewGmail('${acc.email}')" class="px-3 py-1.5 rounded-xl text-xs font-medium ${isAct ? 'bg-indigo-600 text-white' : 'bg-[var(--content)] text-[var(--foreground)] border border-[var(--border)]'}">${acc.email}</button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function setOverviewGmail(email) {
+      overviewGmailFilter = email;
+      renderOverviewPills();
+      renderOverviewTable();
+    }
+
+    function renderOverviewTable() {
+      const search = document.getElementById('overviewSearchInput').value.toLowerCase().trim();
+      const cat = document.getElementById('overviewCatSelect').value;
+      const sort = document.getElementById('overviewSortSelect').value;
+
+      let list = subscriptionsData.filter(s => {
+        if (overviewGmailFilter !== 'all' && s.gmail !== overviewGmailFilter) return false;
+        if (cat !== 'all' && s.category !== cat) return false;
+        if (search) return s.name.toLowerCase().includes(search) || s.gmail.toLowerCase().includes(search) || s.payment.toLowerCase().includes(search);
+        return true;
+      });
+
+      if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+      else if (sort === 'name-asc') list.sort((a, b) => a.name.localeCompare(b.name));
+      else list.sort((a, b) => new Date(a.nextDate) - new Date(b.nextDate));
+
+      document.getElementById('overviewTableBody').innerHTML = list.map(sub => {
+        const acc = gmailAccounts.find(a => a.email === sub.gmail) || { color: "blue" };
+        const pillCls = pillStyleMap[acc.color] || pillStyleMap.blue;
+        return `
+          <tr class="hover:bg-[var(--content)] transition ${sub.status === 'paused' ? 'opacity-50' : ''}">
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg ${sub.iconBg} text-white flex items-center justify-center font-bold text-xs shrink-0">${sub.iconText}</div>
+                <div>
+                  <div class="font-bold text-[var(--foreground)]">${sub.name}</div>
+                  <div class="text-xs text-[var(--muted-foreground)]">${sub.plan}</div>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-1 rounded-full text-xs font-mono border ${pillCls}">${sub.gmail}</span>
+                <button onclick="openQuickVault(${sub.id})" class="px-2 py-1 rounded-lg text-xs font-semibold bg-indigo-500/10 text-indigo-500 border border-indigo-500/30 hover:bg-indigo-500/20">🔑 Pass &amp; 2FA</button>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-right font-bold tabular-nums text-[var(--foreground)]">
+              <div>$${sub.price.toFixed(2)}<span class="text-xs font-normal text-[var(--muted-foreground)]">/${sub.cycle}</span></div>
+              <div class="text-xs font-normal text-[var(--muted-foreground)]">~${formatVnd(sub.price)}</div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="text-xs font-semibold ${sub.urgency === 'urgent' ? 'text-rose-500' : sub.urgency === 'warning' ? 'text-amber-500' : 'text-[var(--foreground)]'}">${sub.nextText}</div>
+              <div class="text-xs text-[var(--muted-foreground)]">${sub.nextDate}</div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="text-xs text-[var(--foreground)]">${sub.payment}</div>
+              <button onclick="previewReceiptModal('${sub.name}', '$${sub.price.toFixed(2)} (~${formatVnd(sub.price)})', '${sub.receiptId}', '${sub.gmail}', '${sub.payment}', '${sub.nextDate}')" class="text-xs text-indigo-500 hover:underline">#${sub.receiptId}</button>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="toggleSubPause(${sub.id})" class="px-2.5 py-1 rounded-lg text-xs border ${sub.status !== 'paused' ? 'text-rose-500 border-rose-500/30 hover:bg-rose-500/10' : 'text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10'}">${sub.status !== 'paused' ? 'Hủy' : 'Mở lại'}</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderPersonalBreakdown() {
+      const container = document.getElementById('personalSpendBreakdown');
+      const activeSubs = subscriptionsData.filter(s => s.status !== 'paused');
+      const total = activeSubs.reduce((sum, s) => sum + s.price, 0) || 1;
+      const sorted = [...gmailAccounts].map(acc => {
+        const spend = activeSubs.filter(s => s.gmail === acc.email).reduce((sum, s) => sum + s.price, 0);
+        return { ...acc, spend, pct: (spend / total) * 100 };
+      }).sort((a, b) => b.spend - a.spend);
+
+      container.innerHTML = sorted.map(acc => `
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-medium text-[var(--foreground)] flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full ${barColorMap[acc.color] || 'bg-indigo-500'}"></span>
+              <span>${acc.email}</span>
+              <span class="text-[var(--muted-foreground)]">(${acc.tag})</span>
+            </span>
+            <span class="font-bold text-[var(--foreground)] tabular-nums">$${acc.spend.toFixed(2)} <span class="text-[var(--muted-foreground)] font-normal">(${formatVnd(acc.spend)})</span></span>
+          </div>
+          <div class="w-full bg-[var(--content)] h-2 rounded-full overflow-hidden">
+            <div class="${barColorMap[acc.color] || 'bg-indigo-500'} h-full rounded-full" style="width: ${acc.pct}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderPersonalAlerts() {
+      const box = document.getElementById('personalAlertsBox');
+      const items = subscriptionsData.filter(s => s.status !== 'paused' && (s.urgency === 'urgent' || s.urgency === 'warning'));
+      if (items.length === 0) {
+        box.innerHTML = `<div class="text-xs text-[var(--muted-foreground)]">Chưa có gói nào sắp hết hạn trong vài ngày tới.</div>`;
+        return;
+      }
+      box.innerHTML = items.map(s => `
+        <div class="p-3 rounded-xl ${s.urgency === 'urgent' ? 'bg-rose-500/10 border-rose-500/30' : 'bg-amber-500/10 border-amber-500/30'} border flex items-center justify-between gap-2">
+          <div>
+            <div class="font-bold ${s.urgency === 'urgent' ? 'text-rose-500' : 'text-amber-500'}">${s.name} — ${s.nextText}</div>
+            <div class="text-[var(--muted-foreground)] mt-0.5">Gmail: <code>${s.gmail}</code> • $${s.price.toFixed(2)} (${s.payment})</div>
+          </div>
+          <button onclick="switchMainView('vault'); selectVaultAccount('${s.gmail}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-semibold shrink-0">Xem Mail</button>
+        </div>
+      `).join('');
+    }
+
+    function openQuickVault(subId) {
+      if (vaultLocked) { showToast("Két đang khóa!"); return; }
+      const sub = subscriptionsData.find(s => s.id === subId);
+      const acc = sub && gmailAccounts.find(a => a.email === sub.gmail);
+      if (!acc) return;
+
+      quickVaultTarget = sub;
+      document.getElementById('qvTitle').innerText = `Đăng nhập nhanh: ${sub.name}`;
+      document.getElementById('qvEmail').innerText = acc.email;
+      document.getElementById('qvPass').innerText = acc.password;
+
+      const customBox = document.getElementById('qvCustomPassBox');
+      if (sub.authMode === 'custom' && sub.customPass) {
+        customBox.classList.remove('hidden');
+        document.getElementById('qvCustomPass').innerText = sub.customPass;
+      } else {
+        customBox.classList.add('hidden');
+      }
+      tickTotp();
+      openModal('quickVaultModal');
+    }
+
+    function copyQuickVaultPass() { copyString(document.getElementById('qvPass').innerText, "Đã sao chép mật khẩu Gmail!"); }
+    function copyQuickVaultTotp() { const c = document.getElementById('qvTotp').innerText.replace(/\s/g, ''); copyString(c, `Đã sao chép mã 2FA: ${c}`); }
+    function copyQuickCustomPass() { copyString(document.getElementById('qvCustomPass').innerText, "Đã sao chép mật khẩu riêng!"); }
+
+    function previewReceiptModal(name, price, receiptId, gmail, payment, timestamp) {
+      document.getElementById('modalServiceName').innerText = `Biên Lai: ${name}`;
+      document.getElementById('modalInvoiceId').innerText = `Mã giao dịch: #${receiptId}`;
+      document.getElementById('modalTargetGmail').innerText = gmail;
+      document.getElementById('modalPaymentMethod').innerText = payment;
+      document.getElementById('modalTimestamp').innerText = timestamp;
+      document.getElementById('modalTotalPrice').innerText = price;
+      openModal('receiptModal');
+    }
+
+    function exportJsonBackup() {
+      const blob = new Blob([JSON.stringify({ gmailAccounts, subscriptionsData }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `submail-personal-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Đã tải file sao lưu JSON!");
+    }
+
+    function importJsonBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (Array.isArray(data.gmailAccounts) && Array.isArray(data.subscriptionsData)) {
+            gmailAccounts = data.gmailAccounts;
+            subscriptionsData = data.subscriptionsData;
+            selectedGmail = gmailAccounts[0]?.email || "";
+            saveState();
+            refreshAll();
+            closeModal('backupDataModal');
+            showToast("Khôi phục dữ liệu thành công!");
+          } else {
+            showToast("File JSON không đúng định dạng!");
+          }
+        } catch (err) {
+          showToast("Không đọc được file JSON!");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetDemoData() {
+      if (!confirm("Khôi phục toàn bộ dữ liệu về danh sách mẫu ban đầu?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      loadState();
+      selectedGmail = gmailAccounts[0].email;
+      closeModal('backupDataModal');
+      refreshAll();
+      showToast("Đã khôi phục dữ liệu mẫu!");
+    }
+
+    function openModal(id) {
+      if (id === 'addSubModal') populateSubGmailSelect();
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      if (id === 'quickVaultModal') quickVaultTarget = null;
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function copyTextById(elId, msg) { copyString(document.getElementById(elId).innerText, msg); }
+    function copyString(str, msg) {
+      if (navigator.clipboard) navigator.clipboard.writeText(str).catch(() => {});
+      showToast(msg || "Đã sao chép!");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => toast.classList.add('hidden'), 2800);
+    }
+
+    function refreshAll() {
+      updateGlobalStrip();
+      renderVaultAccountList();
+      renderVaultDetail();
+      renderOverviewPills();
+      renderOverviewTable();
+      renderPersonalBreakdown();
+      renderPersonalAlerts();
+      tickTotp();
+    }
+
+    refreshAll();
+  </script>
+</body>
+</html>

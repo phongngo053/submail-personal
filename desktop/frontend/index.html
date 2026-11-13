@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>SubMail Personal — Quản lý Gmail Cá Nhân, Pass, 2FA &amp; Subscriptions</title>
+    <link rel="stylesheet" href="./src/style.css" />
+    <script>
+      // Apply the stored theme before first paint to avoid a light flash.
+      try {
+        if (JSON.parse(localStorage.getItem('darkMode')) === true)
+          document.documentElement.classList.add('dark');
+      } catch {
+        /* first visit */
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Icon sprite: 24x24 stroke icons in one geometry family. -->
+    <svg width="0" height="0" class="sr-only" aria-hidden="true" focusable="false">
+      <defs>
+        <symbol id="i-grid" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-layers" viewBox="0 0 24 24" fill="none">
+          <path
+            d="m12 3 8.5 4.5L12 12 3.5 7.5 12 3Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+          <path
+            d="m4 12 8 4.3 8-4.3M4 16.5l8 4.3 8-4.3"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-card" viewBox="0 0 24 24" fill="none">
+          <rect
+            x="3"
+            y="5.5"
+            width="18"
+            height="13"
+            rx="2.5"
+            stroke="currentColor"
+            stroke-width="1.6"
+          />
+          <path
+            d="M3 10h18M6.5 14.5h4"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </symbol>
+        <symbol id="i-refresh" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M20 12a8 8 0 1 1-2.4-5.7M20 4v4.5h-4.5"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-user-plus" viewBox="0 0 24 24" fill="none">
+          <circle
+            cx="10"
+            cy="8"
+            r="3.4"
+            stroke="currentColor"
+            stroke-width="1.6"
+          />
+          <path
+            d="M3.8 19.4c.5-3.1 3-5.1 6.2-5.1 1.4 0 2.6.4 3.6 1.1M17 15v6M14 18h6"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-sliders" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h9M17 17h3"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+          <circle cx="15" cy="7" r="2" stroke="currentColor" stroke-width="1.6" />
+          <circle cx="9" cy="12" r="2" stroke="currentColor" stroke-width="1.6" />
+          <circle cx="15" cy="17" r="2" stroke="currentColor" stroke-width="1.6" />
+        </symbol>
+        <symbol id="i-search" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M9.4 3a6.4 6.4 0 1 0 3.9 11.5l3.2 3.2 1.1-1.1-3.2-3.2A6.4 6.4 0 0 0 9.4 3Zm0 1.5a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8Z"
+            fill="currentColor"
+          />
+        </symbol>
+        <symbol id="i-sun" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="3.6" stroke="currentColor" stroke-width="1.5" />
+          <path
+            d="M10 1.6v2M10 16.4v2M1.6 10h2M16.4 10h2M4 4l1.4 1.4M14.6 14.6 16 16M16 4l-1.4 1.4M5.4 14.6 4 16"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </symbol>
+        <symbol id="i-moon" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M16.8 12.6A7.2 7.2 0 0 1 7.4 3.2a7.2 7.2 0 1 0 9.4 9.4Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-bell" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M6 9a6 6 0 1 1 12 0c0 3.2.7 4.9 1.4 5.9.4.5 0 1.1-.6 1.1H5.2c-.6 0-1-.6-.6-1.1C5.3 13.9 6 12.2 6 9Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M9.8 19.2a2.4 2.4 0 0 0 4.4 0"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </symbol>
+        <symbol id="i-menu" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M4 6h16M4 12h9M4 18h16"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </symbol>
+        <symbol id="i-plus" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M10 3.5v13M3.5 10h13"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+          />
+        </symbol>
+        <symbol id="i-download" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M10 3v9m0 0 3.4-3.4M10 12 6.6 8.6M3.5 15.5h13"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-upload" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M10 13V4m0 0L6.6 7.4M10 4l3.4 3.4M3.5 15.5h13"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-zap" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M11.5 2.5 4 11.2h4.6L8 17.5 16 8.6h-4.7l.2-6.1Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 20 20" fill="none">
+          <path
+            d="m4.5 10.5 3.6 3.6 7.4-8"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-alert" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M10 3.2 2.8 16.3h14.4L10 3.2Zm0 4.4v4.2m0 2.4v.6"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6" />
+          <path
+            d="M12 7.5V12l3 1.8"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6" />
+          <path
+            d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.4 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.4-3.6-8.5S9.6 5.9 12 3.5Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+          />
+        </symbol>
+        <symbol id="i-plug" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M9 3v5M15 3v5M6.5 8h11v3.5a5.5 5.5 0 0 1-11 0V8ZM12 17v4"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-key" viewBox="0 0 24 24" fill="none">
+          <circle cx="8" cy="8" r="4" stroke="currentColor" stroke-width="1.6" />
+          <path
+            d="m11 11 8 8m-2.5-2.5 2-2m-4 0 2-2"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M12 3 5 6v6c0 4.4 3 7.6 7 9 4-1.4 7-4.6 7-9V6l-7-3Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-inbox" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M4 13h4l1.5 3h5L16 13h4M4 13 6.2 5.5A2 2 0 0 1 8.1 4h7.8a2 2 0 0 1 1.9 1.5L20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-copy" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M9 9h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M6 16H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </symbol>
+        <symbol id="i-eye" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" />
+        </symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M4 7h16M9.5 7V5.5A1.5 1.5 0 0 1 11 4h2a1.5 1.5 0 0 1 1.5 1.5V7M6 7l1 12.5A2 2 0 0 0 9 21h6a2 2 0 0 0 2-1.5L18 7"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </symbol>
+        <symbol id="i-wallet" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M20 11h-4a2 2 0 0 0 0 4h4"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+        </symbol>
+      </defs>
+    </svg>
+
+    <div class="app-shell">
+      <!-- ============================== Sidebar ============================== -->
+      <aside class="sidebar" id="sidebar" aria-label="Điều hướng chính">
+        <div class="sidebar-header">
+          <a href="#/vault" class="brand" data-nav="vault">
+            <span class="brand-mark" aria-hidden="true">
+              <svg width="22" height="22"><use href="#i-shield" /></svg>
+            </span>
+            <span class="brand-text">
+              <span class="brand-name">SubMail Personal</span>
+              <span class="brand-sub">Két Gmail &amp; Subscriptions</span>
+            </span>
+          </a>
+        </div>
+
+        <nav>
+          <h3 class="menu-group-title">Menu</h3>
+          <ul class="menu">
+            <li>
+              <a href="#/vault" class="menu-item is-active" data-nav="vault">
+                <svg><use href="#i-inbox" /></svg><span>Két Gmail</span>
+                <span class="menu-badge" id="navAccountCount">0</span>
+              </a>
+            </li>
+            <li>
+              <a href="#/overview" class="menu-item" data-nav="overview">
+                <svg><use href="#i-grid" /></svg><span>Tổng quan Subs</span>
+                <span class="menu-badge" id="navSubCount">0</span>
+              </a>
+            </li>
+            <li>
+              <a href="#/overview" class="menu-item" data-nav="alerts">
+                <svg><use href="#i-alert" /></svg><span>Cảnh báo</span>
+                <span class="menu-badge" id="navAlertCount">0</span>
+              </a>
+            </li>
+          </ul>
+
+          <h3 class="menu-group-title">Vận hành</h3>
+          <ul class="menu">
+            <li>
+              <a href="#/system" class="menu-item" data-nav="system">
+                <svg><use href="#i-sliders" /></svg><span>Hệ thống</span>
+              </a>
+            </li>
+            <li>
+              <button type="button" class="menu-item" data-action="open-backup">
+                <svg><use href="#i-download" /></svg><span>Sao lưu &amp; Khôi phục</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="sidebar-card">
+          <h4>Két đang mở</h4>
+          <p id="sidebarVaultHint">Đang tải trạng thái két…</p>
+          <div class="row-between mt-4">
+            <span class="badge active" id="sidebarVaultBadge">mở</span>
+            <span class="pill" id="sidebarVersion">v0.1.0</span>
+          </div>
+        </div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- ============================== Content ============================== -->
+      <div class="content-wrap">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              class="icon-btn"
+              id="sidebarToggle"
+              aria-label="Mở/đóng sidebar"
+              aria-expanded="false"
+            >
+              <svg width="20" height="20"><use href="#i-menu" /></svg>
+            </button>
+
+            <div class="topbar-title">
+              <strong id="pageTitle">Két Gmail</strong>
+              <span id="pageSubtitle">Mật khẩu, mã 2FA sống và gói đăng ký</span>
+            </div>
+          </div>
+
+          <div class="topbar-search">
+            <svg width="20" height="20"><use href="#i-search" /></svg>
+            <input
+              id="globalSearch"
+              type="search"
+              placeholder="Tìm Gmail, dịch vụ, thẻ thanh toán…"
+              aria-label="Tìm kiếm"
+            />
+            <span class="kbd" aria-hidden="true">Ctrl K</span>
+          </div>
+
+          <div class="topbar-right">
+            <button
+              class="icon-btn"
+              id="themeToggle"
+              aria-label="Chuyển chế độ sáng/tối"
+            >
+              <svg width="20" height="20" class="theme-icon-light"><use href="#i-sun" /></svg>
+              <svg width="20" height="20" class="theme-icon-dark"><use href="#i-moon" /></svg>
+            </button>
+
+            <div class="dropdown" id="alertsDropdown">
+              <button
+                class="icon-btn"
+                aria-label="Cảnh báo"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <svg width="20" height="20"><use href="#i-bell" /></svg>
+                <span class="notification-dot hidden" id="alertCount">0</span>
+              </button>
+              <div class="dropdown-panel" role="menu">
+                <div class="dropdown-header">
+                  <strong>Cảnh báo gia hạn</strong>
+                  <span id="alertsSummary">Không có bất thường</span>
+                </div>
+                <div id="alertsList"></div>
+              </div>
+            </div>
+
+            <div class="dropdown" id="userDropdown">
+              <button
+                class="icon-btn"
+                aria-label="Tài khoản"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span
+                  class="cell-avatar"
+                  style="width: 32px; height: 32px; flex-basis: 32px; border-radius: 999px; font-size: 12px"
+                  >SP</span
+                >
+              </button>
+              <div class="dropdown-panel" role="menu">
+                <div class="dropdown-header">
+                  <strong>SubMail Personal</strong>
+                  <span id="userVersion">Két Gmail cá nhân &amp; Subscriptions</span>
+                </div>
+                <button class="dropdown-item" data-action="refresh-all">
+                  <svg><use href="#i-refresh" /></svg> Refresh toàn bộ
+                </button>
+                <button class="dropdown-item" data-action="toggle-lock">
+                  <svg><use href="#i-shield" /></svg> <span id="userLockLabel">Khóa két</span>
+                </button>
+                <button class="dropdown-item" data-action="open-backup">
+                  <svg><use href="#i-download" /></svg> Sao lưu &amp; Khôi phục
+                </button>
+                <button class="dropdown-item" data-nav="system">
+                  <svg><use href="#i-sliders" /></svg> Cấu hình hệ thống
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="main">
+          <!-- ============================== Vault ============================== -->
+          <section class="page is-active" data-page="vault">
+            <div class="grid">
+              <div class="col-4">
+                <article class="card">
+                  <div class="vault-toolbar">
+                    <div class="vault-search">
+                      <svg><use href="#i-search" /></svg>
+                      <input
+                        id="vaultSearchGmail"
+                        type="search"
+                        onkeyup="renderVaultAccountList()"
+                        placeholder="Tìm địa chỉ Gmail, ghi chú…"
+                        aria-label="Tìm Gmail"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      onclick="openModal('addGmailModal')"
+                    >
+                      <svg><use href="#i-plus" /></svg> Thêm
+                    </button>
+                  </div>
+                  <div class="vault-toolbar" style="padding-top: 0; padding-bottom: 12px">
+                    <div class="filter-pills" id="vaultTagPills"></div>
+                  </div>
+                  <div class="vault-list" id="vaultAccountList"></div>
+                </article>
+              </div>
+
+              <div class="col-8 stack">
+                <article class="card card-pad hidden" id="vaultEmptyState">
+                  <div class="empty">
+                    Chưa có tài khoản Gmail nào.<br />
+                    <strong>Nhấn “Thêm Gmail” để bắt đầu.</strong>
+                  </div>
+                </article>
+
+                <div class="stack hidden" id="vaultDetailContent">
+                <article class="card">
+                  <div class="card-pad" style="padding-bottom: 0">
+                    <div class="row-between" style="align-items: flex-start">
+                      <div class="cell-main">
+                        <div class="avatar avatar-lg avatar-brand" id="detailAvatar">MC</div>
+                        <div style="min-width: 0">
+                          <div class="row" style="gap: 8px; flex-wrap: wrap">
+                            <h3 class="cell-title mono" id="detailEmail" style="font-size: 15px">
+                              tenban@gmail.com
+                            </h3>
+                            <button
+                              type="button"
+                              class="icon-btn"
+                              style="width: 28px; height: 28px; flex-basis: 28px"
+                              onclick="copyTextById('detailEmail', 'Đã sao chép địa chỉ Gmail')"
+                              title="Sao chép Gmail"
+                            >
+                              <svg width="16" height="16"><use href="#i-copy" /></svg>
+                            </button>
+                            <span class="tag-pill pill-blue" id="detailTagBadge">Mail Chính</span>
+                          </div>
+                          <div class="row" style="gap: 12px; flex-wrap: wrap; margin-top: 4px">
+                            <span class="cell-sub" id="detailRecoveryDisplay"
+                              >Khôi phục: backup@gmail.com</span
+                            >
+                            <span class="cell-sub" id="detailNoteDisplay"></span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row" style="gap: 8px; flex-wrap: wrap">
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-sm hidden"
+                          id="btnGenAvatar"
+                          onclick="generateAvatarForAccount(selectedGmail)"
+                          title="Tạo avatar bằng AI (mất khoảng 20-30 giây)"
+                        >
+                          ⚡ Tạo Avatar AI
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-sm"
+                          onclick="openEditCredentialsModal()"
+                        >
+                          Sửa Pass / 2FA
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-sm"
+                          onclick="openBackupCodesModal()"
+                        >
+                          8 Mã Dự Phòng
+                        </button>
+                        <button
+                          type="button"
+                          class="icon-btn danger"
+                          style="width: 34px; height: 34px; flex-basis: 34px; color: var(--error-500)"
+                          onclick="deleteSelectedGmail()"
+                          title="Xóa tài khoản này"
+                        >
+                          <svg width="16" height="16"><use href="#i-trash" /></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cred-grid">
+                    <div class="cred-box">
+                      <div class="cred-head">
+                        <span class="cred-label">Mật khẩu Gmail</span>
+                        <span class="twofa-on">Đã lưu cục bộ</span>
+                      </div>
+                      <div class="cred-value">
+                        <span class="mono" id="detailPasswordText">••••••••••••••</span>
+                        <div class="row" style="gap: 4px; flex: 0 0 auto">
+                          <button
+                            type="button"
+                            class="icon-btn"
+                            style="width: 30px; height: 30px; flex-basis: 30px"
+                            onclick="toggleDetailPassword()"
+                            title="Hiện / Ẩn mật khẩu"
+                          >
+                            <svg width="16" height="16"><use href="#i-eye" /></svg>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            onclick="copySelectedPassword()"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                      <div class="cred-foot">
+                        <span>SĐT: <strong id="detailPhoneDisplay">090* *** 000</strong></span>
+                        <button
+                          type="button"
+                          class="link-btn"
+                          onclick="copyAppPassword()"
+                        >
+                          Copy App Pass
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="cred-box accent">
+                      <div class="cred-head">
+                        <span class="cred-label accent">Mã 2FA (RFC 6238)</span>
+                        <span class="totp-timer" id="detailTotpCountdown">24s</span>
+                      </div>
+                      <div class="cred-value">
+                        <span class="totp-code" id="detailTotpCode">••• •••</span>
+                        <button
+                          type="button"
+                          class="btn btn-primary btn-sm"
+                          onclick="copySelectedTotp()"
+                        >
+                          Copy 2FA
+                        </button>
+                      </div>
+                      <div class="progress mt-4">
+                        <span id="detailTotpProgressBar" style="width: 80%"></span>
+                      </div>
+                      <div class="secret-row">
+                        <span>Secret: <code class="mono" id="detailSecretMask">JBSW••••3PXP</code></span>
+                        <button type="button" class="link-btn" onclick="copySecretKey()">
+                          Copy Secret
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="card">
+                  <div class="card-pad" style="padding-bottom: 0">
+                    <div class="row-between">
+                      <div>
+                        <h3 class="card-title" style="font-size: 16px">
+                          Subscriptions của Gmail này
+                          <span class="tag-pill pill-brand" id="detailSubCountBadge">0 gói</span>
+                        </h3>
+                        <p class="card-subtitle">
+                          Chi tiêu riêng hộp thư này:
+                          <strong class="text-strong" id="detailSubTotalSpend">$0.00/tháng</strong>
+                          <span class="tabular-nums" id="detailSubTotalVnd"></span>
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        onclick="openAddSubForCurrentGmail()"
+                      >
+                        <svg><use href="#i-plus" /></svg> Thêm Sub
+                      </button>
+                    </div>
+                  </div>
+                  <div class="table-wrap card-pad" style="padding-top: 16px">
+                    <table class="data">
+                      <thead>
+                        <tr>
+                          <th>Dịch vụ / App</th>
+                          <th>Đăng nhập</th>
+                          <th class="text-right">Giá</th>
+                          <th>Gia hạn</th>
+                          <th class="text-right">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody id="detailSubsTableBody"></tbody>
+                    </table>
+                  </div>
+                </article>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============================= Overview ============================= -->
+          <section class="page" data-page="overview">
+            <div class="stack">
+              <div class="metric-grid">
+                <article class="metric">
+                  <div class="metric-icon brand">
+                    <svg width="24" height="24"><use href="#i-inbox" /></svg>
+                  </div>
+                  <div class="metric-body">
+                    <div>
+                      <span class="metric-label">Tổng Gmail</span>
+                      <span class="metric-value tabular-nums" id="metricGmails">0</span>
+                    </div>
+                    <span class="trend up" id="metricGmailsTrend">cá nhân</span>
+                  </div>
+                </article>
+
+                <article class="metric">
+                  <div class="metric-icon success">
+                    <svg width="24" height="24"><use href="#i-layers" /></svg>
+                  </div>
+                  <div class="metric-body">
+                    <div>
+                      <span class="metric-label">Gói đang chạy</span>
+                      <span class="metric-value tabular-nums" id="metricSubs">0</span>
+                    </div>
+                    <span class="trend flat" id="metricSubsTrend">tất cả</span>
+                  </div>
+                </article>
+
+                <article class="metric">
+                  <div class="metric-icon warning">
+                    <svg width="24" height="24"><use href="#i-wallet" /></svg>
+                  </div>
+                  <div class="metric-body">
+                    <div>
+                      <span class="metric-label">Chi phí / tháng</span>
+                      <span class="metric-value tabular-nums" id="metricCost">$0.00</span>
+                      <span class="cell-sub tabular-nums" id="metricCostVnd"></span>
+                    </div>
+                    <span class="trend up" id="metricCostTrend">USD</span>
+                  </div>
+                </article>
+
+                <article class="metric">
+                  <div class="metric-icon error">
+                    <svg width="24" height="24"><use href="#i-alert" /></svg>
+                  </div>
+                  <div class="metric-body">
+                    <div>
+                      <span class="metric-label">Sắp gia hạn</span>
+                      <span class="metric-value tabular-nums" id="metricExpiring">0</span>
+                    </div>
+                    <span class="trend down" id="metricExpiringTrend">trong 5 ngày</span>
+                  </div>
+                </article>
+              </div>
+
+              <article class="card">
+                <div class="card-pad">
+                  <div class="row-between">
+                    <div class="filter-pills" id="overviewGmailPills"></div>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      onclick="openModal('addSubModal')"
+                    >
+                      <svg><use href="#i-plus" /></svg> Thêm Subscription
+                    </button>
+                  </div>
+                  <div class="row-between mt-4">
+                    <div class="vault-search" style="max-width: 360px">
+                      <svg><use href="#i-search" /></svg>
+                      <input
+                        id="overviewSearchInput"
+                        type="search"
+                        onkeyup="renderOverviewTable()"
+                        placeholder="Tìm dịch vụ, Gmail, thẻ thanh toán…"
+                        aria-label="Tìm subscription"
+                      />
+                    </div>
+                    <div class="row" style="gap: 8px; flex-wrap: wrap">
+                      <select
+                        id="overviewCatSelect"
+                        class="select"
+                        onchange="renderOverviewTable()"
+                        style="width: auto; height: 36px; font-size: 13px"
+                        aria-label="Lọc danh mục"
+                      >
+                        <option value="all">Mọi danh mục</option>
+                        <option value="AI">AI &amp; Công Cụ</option>
+                        <option value="Media">Giải Trí &amp; Nhạc/Phim</option>
+                        <option value="Dev">Học Tập &amp; Dev</option>
+                        <option value="Storage">Lưu Trữ &amp; Tiện Ích</option>
+                        <option value="Shopping">Mua Sắm / Giao Hàng</option>
+                      </select>
+                      <select
+                        id="overviewSortSelect"
+                        class="select"
+                        onchange="renderOverviewTable()"
+                        style="width: auto; height: 36px; font-size: 13px"
+                        aria-label="Sắp xếp"
+                      >
+                        <option value="renewal-asc">Gia hạn: Sắp tới trước</option>
+                        <option value="price-desc">Giá: Cao đến thấp</option>
+                        <option value="name-asc">Tên: A - Z</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="table-wrap card-pad" style="padding-top: 0">
+                  <table class="data">
+                    <thead>
+                      <tr>
+                        <th>Dịch vụ &amp; Gói</th>
+                        <th>Gmail đăng ký</th>
+                        <th class="text-right">Chi phí</th>
+                        <th>Gia hạn</th>
+                        <th>Thẻ / Ví &amp; biên lai</th>
+                        <th class="text-right">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="overviewTableBody"></tbody>
+                  </table>
+                </div>
+              </article>
+
+              <div class="grid">
+                <div class="col-6">
+                  <article class="card card-pad">
+                    <div class="card-head">
+                      <div>
+                        <h3 class="card-title" style="font-size: 16px">
+                          Chi tiêu theo từng Gmail
+                        </h3>
+                        <p class="card-subtitle">Phân bổ chi phí hằng tháng</p>
+                      </div>
+                    </div>
+                    <div class="breakdown" id="personalSpendBreakdown"></div>
+                  </article>
+                </div>
+                <div class="col-6">
+                  <article class="card card-pad">
+                    <div class="card-head">
+                      <div>
+                        <h3 class="card-title" style="font-size: 16px">
+                          Nhắc nhở tránh bị trừ tiền oan
+                        </h3>
+                        <p class="card-subtitle">Gói trial hoặc sắp tới hạn gia hạn</p>
+                      </div>
+                    </div>
+                    <div class="stack" style="gap: 10px" id="personalAlertsBox"></div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============================== System ============================== -->
+          <section class="page" data-page="system">
+            <div class="grid">
+              <div class="col-8 stack">
+                <article class="card card-pad">
+                  <div class="card-head">
+                    <div>
+                      <h3 class="card-title">Thông tin hệ thống</h3>
+                      <p class="card-subtitle">Nơi lưu dữ liệu và trạng thái két</p>
+                    </div>
+                  </div>
+                  <dl class="kv">
+                    <div>
+                      <dt>Đường dẫn dữ liệu</dt>
+                      <dd class="mono" id="systemDataPath">—</dd>
+                    </div>
+                    <div>
+                      <dt>Trạng thái két</dt>
+                      <dd><span class="badge active" id="systemVaultBadge">đang mở</span></dd>
+                    </div>
+                    <div>
+                      <dt>Số tài khoản Gmail</dt>
+                      <dd class="tabular-nums" id="systemAccountCount">0</dd>
+                    </div>
+                    <div>
+                      <dt>Số gói đăng ký</dt>
+                      <dd class="tabular-nums" id="systemSubCount">0</dd>
+                    </div>
+                    <div>
+                      <dt>Chu kỳ đổi mã 2FA</dt>
+                      <dd class="tabular-nums">30 giây (RFC 6238)</dd>
+                    </div>
+                  </dl>
+                </article>
+
+                <article class="card card-pad">
+                  <div class="card-head">
+                    <div>
+                      <h3 class="card-title">Sao lưu &amp; khôi phục</h3>
+                      <p class="card-subtitle">
+                        File sao lưu chứa toàn bộ bí mật ở dạng rõ — hãy giữ kín
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm"
+                      onclick="openModal('backupDataModal')"
+                    >
+                      <svg><use href="#i-download" /></svg> Mở
+                    </button>
+                  </div>
+                  <div class="action-list">
+                    <div class="action-row">
+                      <span class="action-icon"><svg width="20" height="20"><use href="#i-download" /></svg></span>
+                      <div class="action-text">
+                        <strong>Xuất file sao lưu (.json)</strong>
+                        <span>Chọn nơi lưu trên máy bạn.</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        onclick="exportJsonBackup()"
+                      >
+                        Xuất
+                      </button>
+                    </div>
+                    <div class="action-row">
+                      <span class="action-icon"><svg width="20" height="20"><use href="#i-upload" /></svg></span>
+                      <div class="action-text">
+                        <strong>Nhập file sao lưu (.json)</strong>
+                        <span>Thay thế toàn bộ dữ liệu hiện tại.</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        onclick="importJsonBackup()"
+                      >
+                        Nhập
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <div class="col-4 stack">
+                <article class="card card-pad">
+                  <div class="card-head">
+                    <div>
+                      <h3 class="card-title" style="font-size: 16px">Ảnh &amp; biểu tượng</h3>
+                      <p class="card-subtitle">Sinh ảnh bằng dịch vụ tạo ảnh AI cục bộ</p>
+                    </div>
+                  </div>
+                  <div class="action-list">
+                    <div class="action-row">
+                      <span class="action-icon"><svg width="20" height="20"><use href="#i-zap" /></svg></span>
+                      <div class="action-text">
+                        <strong>Tạo icon ứng dụng</strong>
+                        <span
+                          >Sinh ảnh 1024x1024 để làm logo cho ứng dụng. Mất khoảng
+                          20-30 giây.</span
+                        >
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm hidden"
+                        id="btnGenAppIcon"
+                        onclick="generateApplicationIcon()"
+                      >
+                        Tạo
+                      </button>
+                    </div>
+                  </div>
+                  <div class="note mt-4">
+                    Icon của từng gói đăng ký và avatar Gmail được tạo ngay trong
+                    màn hình tương ứng. Ảnh được lưu trong thư mục
+                    <code>%AppData%\SubMailPersonal\icons</code> nên vẫn hiển thị khi
+                    không có mạng.
+                  </div>
+                </article>
+
+                <article class="card card-pad">
+                  <div class="card-head">
+                    <div>
+                      <h3 class="card-title" style="font-size: 16px">Vùng nguy hiểm</h3>
+                      <p class="card-subtitle">Thao tác không thể hoàn tác</p>
+                    </div>
+                  </div>
+                  <div class="danger-zone">
+                    <div class="action-text">
+                      <strong>Xóa toàn bộ dữ liệu</strong>
+                      <span
+                        >Xóa toàn bộ tài khoản Gmail và gói đăng ký đang lưu trên máy
+                        này.</span
+                      >
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm mt-4"
+                      onclick="clearAllData()"
+                    >
+                      <svg><use href="#i-trash" /></svg> Xóa toàn bộ dữ liệu
+                    </button>
+                  </div>
+                </article>
+
+                <article class="card card-pad">
+                  <div class="card-head">
+                    <div>
+                      <h3 class="card-title" style="font-size: 16px">Bảo mật</h3>
+                      <p class="card-subtitle">Két chỉ che hiển thị ở tầng giao diện</p>
+                    </div>
+                  </div>
+                  <div class="note">
+                    Khi két <strong>khóa</strong>, mật khẩu, mã 2FA, App Password và 8 mã dự
+                    phòng đều bị che trên giao diện và mọi nút sao chép đều bị từ chối. Tuy
+                    nhiên dữ liệu gốc vẫn nằm trong file JSON <strong>dạng rõ</strong> — hãy
+                    dùng mật khẩu hệ điều hành để bảo vệ máy.
+                  </div>
+                </article>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- ====================== Modal: Add Gmail ====================== -->
+    <div class="auth-gate hidden" id="addGmailModal" role="dialog" aria-modal="true">
+      <div class="auth-gate-card wide">
+        <div class="modal-head">
+          <div>
+            <h3>Thêm Gmail Cá Nhân + Bảo Mật 2FA</h3>
+            <p class="card-subtitle">Dữ liệu được lưu cục bộ trên máy bạn</p>
+          </div>
+          <button
+            type="button"
+            class="icon-btn"
+            style="width: 32px; height: 32px; flex-basis: 32px"
+            onclick="closeModal('addGmailModal')"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="form-stack">
+          <div class="field">
+            <label class="label" for="newGmailInput">Địa chỉ Gmail *</label>
+            <input
+              class="input"
+              type="email"
+              id="newGmailInput"
+              placeholder="vd: tenban@gmail.com"
+            />
+          </div>
+          <div class="grid" style="gap: 16px">
+            <div class="col-6">
+              <div class="field">
+                <label class="label" for="newGmailPass">Mật khẩu Gmail *</label>
+                <input
+                  class="input input-mono"
+                  type="text"
+                  id="newGmailPass"
+                  placeholder="Nhập mật khẩu..."
+                />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="field">
+                <label class="label" for="newGmailTag">Phân loại</label>
+                <select class="select" id="newGmailTag">
+                  <option value="Mail Chính|blue">Mail Chính</option>
+                  <option value="AI &amp; Công Cụ|purple">AI &amp; Công Cụ</option>
+                  <option value="Giải Trí|amber">Giải Trí</option>
+                  <option value="Học Tập / Dev|emerald">Học Tập / Dev</option>
+                  <option value="Mua Sắm / Phụ|rose">Mua Sắm / Phụ</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label" for="newGmail2faSecret"
+              >2FA Secret Key (Google Authenticator Base32)</label
+            >
+            <input
+              class="input input-mono"
+              type="text"
+              id="newGmail2faSecret"
+              placeholder="vd: JBSWY3DPEHPK3PXP (bỏ trống nếu chưa bật 2FA)"
+            />
+            <span class="hint">Mã 2FA được tính ở tầng Go theo RFC 6238.</span>
+          </div>
+          <div class="grid" style="gap: 16px">
+            <div class="col-6">
+              <div class="field">
+                <label class="label" for="newGmailRecovery">Email khôi phục</label>
+                <input
+                  class="input"
+                  type="email"
+                  id="newGmailRecovery"
+                  placeholder="backup@gmail.com"
+                />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="field">
+                <label class="label" for="newGmailPhone">SĐT xác minh</label>
+                <input
+                  class="input"
+                  type="text"
+                  id="newGmailPhone"
+                  placeholder="090* *** 000"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label" for="newGmailNote">Ghi chú cá nhân</label>
+            <input
+              class="input"
+              type="text"
+              id="newGmailNote"
+              placeholder="vd: Dùng cho Netflix &amp; YouTube..."
+            />
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button
+            type="button"
+            class="btn btn-ghost btn-sm"
+            onclick="closeModal('addGmailModal')"
+          >
+            Hủy
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            onclick="saveNewGmailAccount()"
+          >
+            Lưu Gmail &amp; 2FA
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== Modal: Edit credentials ====================== -->
+    <div class="auth-gate hidden" id="editCredsModal" role="dialog" aria-modal="true">
+      <div class="auth-gate-card">
+        <div class="modal-head">
+          <h3>Sửa Mật Khẩu &amp; 2FA</h3>
+          <button
+            type="button"
+            class="icon-btn"
+            style="width: 32px; height: 32px; flex-basis: 32px"
+            onclick="closeModal('editCredsModal')"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="form-stack">
+          <div class="field">
+            <label class="label" for="editEmailReadonly">Tài khoản Gmail</label>
+            <input class="input input-mono" id="editEmailReadonly" type="text" readonly />
+          </div>
+          <div class="field">
+            <label class="label" for="editPassInput">Mật khẩu mới</label>
+            <input class="input input-mono" type="text" id="editPassInput" />
+          </div>
+          <div class="field">
+            <label class="label" for="editSecretInput">2FA Secret Key (Base32)</label>
+            <input class="input input-mono" type="text" id="editSecretInput" />
+          </div>
+          <div class="field">
+            <label class="label" for="editRecoveryInput">Email khôi phục</label>
+            <input class="input" type="text" id="editRecoveryInput" />
+          </div>
+          <div class="field">
+            <label class="label" for="editNoteInput">Ghi chú</label>
+            <input class="input" type="text" id="editNoteInput" />
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button
+            type="button"
+            class="btn btn-ghost btn-sm"
+            onclick="closeModal('editCredsModal')"
+          >
+            Hủy
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            onclick="saveEditedCredentials()"
+          >
+            Lưu Thay Đổi
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== Modal: Backup codes ====================== -->
+    <div class="auth-gate hidden" id="backupCodesModal" role="dialog" aria-modal="true">
+      <div class="auth-gate-card">
+        <div class="modal-head">
+          <div>
+            <h3>8 Mã Dự Phòng 2FA</h3>
+            <p class="card-subtitle" id="backupEmailTitle"></p>
+          </div>
+          <button
+            type="button"
+            class="icon-btn"
+            style="width: 32px; height: 32px; flex-basis: 32px"
+            onclick="closeModal('backupCodesModal')"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
+        <div
+          class="grid"
+          style="gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr))"
+          id="backupCodesGrid"
+        ></div>
+        <div class="modal-foot">
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            onclick="copyAllBackupCodes()"
+          >
+            Copy Tất Cả
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            onclick="closeModal('backupCodesModal')"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== Modal: Add subscription ====================== -->
+    <div class="auth-gate hidden" id="addSubModal" role="dialog" aria-modal="true">
+      <div class="auth-gate-card wide">
+        <div class="modal-head">
+          <div>
+            <h3>Thêm Gói Đăng Ký (Subscription)</h3>
+            <p class="card-subtitle">Gói đăng ký dưới một tài khoản Gmail</p>
+          </div>
+          <button
+            type="button"
+            class="icon-btn"
+            style="width: 32px; height: 32px; flex-basis: 32px"
+            onclick="closeModal('addSubModal')"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="form-stack">
+          <div class="field">
+            <label class="label" for="presetSearchInput">
+              Chọn nhanh từ danh sách dịch vụ có sẵn
+            </label>
+            <input
+              class="input"
+              type="search"
+              id="presetSearchInput"
+              placeholder="Tìm dịch vụ: Netflix, ChatGPT, iCloud..."
+              oninput="renderPresetPicker()"
+            />
+            <div class="preset-grid" id="presetGrid"></div>
+          </div>
+          <div class="field">
+            <label class="label" for="subNameInput">Tên Dịch Vụ / App *</label>
+            <input
+              class="input"
+              type="text"
+              id="subNameInput"
+              placeholder="vd: ChatGPT Plus, Netflix, iCloud+..."
+            />
+          </div>
+          <div class="field">
+            <label class="label" for="subPlanInput">Mô tả gói</label>
+            <input
+              class="input"
+              type="text"
+              id="subPlanInput"
+              placeholder="vd: Gói cá nhân GPT-4o"
+            />
+          </div>
+          <div class="grid" style="gap: 16px">
+            <div class="col-6">
+              <div class="field">
+                <label class="label" for="subPriceInput">Chi phí (USD/tháng) *</label>
+                <input
+                  class="input"
+                  type="number"
+                  step="0.01"
+                  id="subPriceInput"
+                  placeholder="10.00"
+                />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="field">
+                <label class="label" for="subCatInput">Danh mục</label>
+                <select class="select" id="subCatInput">
+                  <option value="AI">AI &amp; Công Cụ</option>
+                  <option value="Media">Giải Trí &amp; Nhạc/Phim</option>
+                  <option value="Dev">Học Tập &amp; Dev</option>
+                  <option value="Storage">Lưu Trữ &amp; Tiện Ích</option>
+                  <option value="Shopping">Mua Sắm / Giao Hàng</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label" for="subGmailSelect">Đăng ký dưới Gmail</label>
+            <select class="select" id="subGmailSelect"></select>
+          </div>
+          <div class="field">
+            <label class="label" for="subAuthModeSelect">Kiểu đăng nhập vào App/Web</label>
+            <select
+              class="select"
+              id="subAuthModeSelect"
+              onchange="toggleSubCustomPassField()"
+            >
+              <option value="sso">
+                Đăng nhập bằng Google (dùng chung Pass + 2FA của Gmail)
+              </option>
+              <option value="custom">Tạo mật khẩu riêng cho app/web này</option>
+            </select>
+          </div>
+          <div class="field hidden" id="subCustomPassWrap">
+            <label class="label" for="subCustomPassInput">Mật khẩu riêng của dịch vụ</label>
+            <input
+              class="input input-mono"
+              type="text"
+              id="subCustomPassInput"
+              placeholder="Nhập mật khẩu riêng..."
+            />
+          </div>
+          <div class="grid" style="gap: 16px">
+            <div class="col-6">
+              <div class="field">
+                <label class="label" for="subDateInput">Ngày gia hạn kế tiếp</label>
+                <input class="input" type="date" id="subDateInput" value="2026-11-28" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="field">
+                <label class="label" for="subCardInput">Thẻ / Ví thanh toán</label>
+                <input class="input" type="text" id="subCardInput" value="Ví MoMo" />
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="subIconBgInput" value="bg-indigo-600" />
+          <input type="hidden" id="subIconTextInput" value="" />
+          <label class="check-row hidden" id="subAiIconRow" for="subAiIconCheck">
+            <input type="checkbox" id="subAiIconCheck" checked />
+            <span>
+              Tạo icon bằng AI
+              <small
+                >Dùng dịch vụ tạo ảnh cục bộ, mất khoảng 20-30 giây. Bỏ chọn nếu
+                muốn dùng badge chữ.</small
+              >
+            </span>
+          </label>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal('addSubModal')">
+            Hủy
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            onclick="saveNewSubscription()"
+          >
+            Lưu Gói
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== Modal: Quick vault ====================== -->
+    <div class="auth-gate hidden" id="quickVaultModal" role="dialog" aria-modal="true">
+      <div class="auth-gate-card">
+        <div class="modal-head">
+          <div>
+            <h3 id="qvTitle">Lấy Nhanh Thông Tin Đăng Nhập</h3>
+            <p class="card-subtitle" id="qvEmail"></p>
+          </div>
+          <button
+            type="button"
+            class="icon-btn"
+            style="width: 32px; height: 32px; flex-basis: 32px"
+            onclick="closeModal('quickVaultModal')"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="stack" style="gap: 12px">
+          <div class="cred-box">
+            <div class="cred-head">
+              <span class="cred-label">Mật khẩu Gmail</span>
+            </div>
+            <div class="cred-value">
+              <span class="mono" id="qvPass"></span>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                onclick="copyQuickVaultPass()"
+              >
+                Copy Pass
+              </button>
+            </div>
+          </div>
+          <div class="cred-box accent">
+            <div class="cred-head">
+              <span class="cred-label accent">Mã 2FA Live</span>
+              <span class="totp-timer" id="qvTimer">24s</span>
+            </div>
+            <div class="cred-value">
+              <span class="totp-code" id="qvTotp">••• •••</span>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                onclick="copyQuickVaultTotp()"
+              >
+                Copy 2FA
+              </button>
+            </div>
+          </div>
+          <div class="cred-box hidden" id="qvCustomPassBox" style="border-color: rgba(247, 144, 9, 0.4)">
+            <div class="cred-head">
+              <span class="cred-label" style="color: var(--warning-600)"
+                >Mật khẩu riêng của app/web</span
+              >
+              <button
+                type="button"
+                class="link-btn"
+                onclick="copyQuickCustomPass()"
+              >
+                Copy
+              </button>
+            </div>
+            <div class="cred-value">
+              <span class="mono" id="qvCustomPass"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== Modal: Receipt ====================== -->
+    <div class="auth-gate hidden" id="receiptModal" role="dialog" aria-modal="true">
+      <div class="auth-gate-card">
+        <div class="modal-head">
+          <div>
+            <h3 id="modalServiceName">Biên Lai Email</h3>
+            <p class="card-subtitle" id="modalInvoiceId"></p>
+          </div>
+          <button
+            type="button"
+            class="icon-btn"
+            style="width: 32px; height: 32px; flex-basis: 32px"
+            onclick="closeModal('receiptModal')"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
+        <dl class="kv">
+          <div>
+            <dt>Gmail nhận thông báo</dt>
+            <dd id="modalTargetGmail"></dd>
+          </div>
+          <div>
+            <dt>Gia hạn tiếp theo</dt>
+            <dd id="modalTimestamp"></dd>
+          </div>
+          <div>
+            <dt>Thanh toán qua</dt>
+            <dd id="modalPaymentMethod"></dd>
+          </div>
+          <div>
+            <dt>Số tiền</dt>
+            <dd class="text-brand" id="modalTotalPrice"></dd>
+          </div>
+        </dl>
+        <div class="modal-foot">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            onclick="closeModal('receiptModal')"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== Modal: Backup / restore ====================== -->
+    <div class="auth-gate hidden" id="backupDataModal" role="dialog" aria-modal="true">
+      <div class="auth-gate-card">
+        <div class="modal-head">
+          <div>
+            <h3>Sao Lưu &amp; Khôi Phục Dữ Liệu</h3>
+            <p class="card-subtitle">Dữ liệu lưu tự động trong file JSON trên máy bạn</p>
+          </div>
+          <button
+            type="button"
+            class="icon-btn"
+            style="width: 32px; height: 32px; flex-basis: 32px"
+            onclick="closeModal('backupDataModal')"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="note">
+          <strong>Cảnh báo:</strong> file sao lưu <strong>.json</strong> chứa toàn bộ mật khẩu,
+          mã 2FA và mã dự phòng ở <strong>dạng rõ</strong>. Hãy lưu ở nơi an toàn.
+        </div>
+        <div class="action-list mt-4">
+          <div class="action-row">
+            <span class="action-icon"><svg width="20" height="20"><use href="#i-download" /></svg></span>
+            <div class="action-text">
+              <strong>Xuất file sao lưu (.json)</strong>
+              <span>Chọn nơi lưu trên máy bạn.</span>
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              onclick="exportJsonBackup()"
+            >
+              Xuất
+            </button>
+          </div>
+          <div class="action-row">
+            <span class="action-icon"><svg width="20" height="20"><use href="#i-upload" /></svg></span>
+            <div class="action-text">
+              <strong>Nhập file sao lưu (.json)</strong>
+              <span>Thay thế toàn bộ dữ liệu hiện tại.</span>
+            </div>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="importJsonBackup()"
+            >
+              Nhập
+            </button>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            onclick="clearAllData()"
+          >
+            <svg><use href="#i-trash" /></svg> Xóa toàn bộ dữ liệu
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-host" id="toastHost" role="status" aria-live="polite"></div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
