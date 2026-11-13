@@ -42,7 +42,12 @@ telemetry. Dữ liệu nằm trong một file JSON trên máy bạn — bạn to
    - Kết nối tới dịch vụ tạo ảnh **OpenAI-compatible** của chính bạn để sinh icon cho gói
      đăng ký, avatar hộp thư và icon ứng dụng.
    - **Mặc định tắt.** Xem [Tích hợp tuỳ chọn](#tích-hợp-tuỳ-chọn-dịch-vụ-tạo-ảnh).
-5. **Sao lưu cục bộ**
+5. **Danh sách dịch vụ có sẵn**
+   - Bấm **Thêm Gói** → lưới **chọn nhanh** gồm ~30 dịch vụ phổ biến (Netflix, Spotify,
+     ChatGPT Plus, Google One, iCloud+, GitHub Copilot, GrabUnlimited, Shopee VIP…).
+   - Chọn một mẫu là tự điền tên, gói, danh mục, giá, chu kỳ và phương thức thanh toán.
+   - Ô tìm kiếm lọc theo tên, mô tả hoặc danh mục.
+6. **Sao lưu cục bộ**
    - **Xuất / Nhập** file sao lưu `.json` qua hộp thoại file native của hệ điều hành.
    - Ghi dữ liệu **atomic**: ghi file tạm rồi rename, nên tắt đột ngột không để lại file
      nửa vời.
@@ -123,6 +128,46 @@ không có cấu hình thì app không hiện nút tạo ảnh và **không gọ
 Dịch vụ phải nói chuẩn OpenAI ở `POST {baseUrl}/v1/images/generations` và trả về một trong hai
 dạng: `data[0].b64_json` (base64) hoặc `data[0].url` (đường dẫn tải ảnh).
 
+### Ảnh được lưu ở đâu
+
+Mỗi ảnh được tải về máy và lưu trong thư mục **cạnh file dữ liệu**:
+
+```text
+%AppData%\SubMailPersonal\
+├── data.json          # dữ liệu gói đăng ký + tài khoản
+├── integrations.json  # cấu hình dịch vụ (có thể chứa apiKey)
+└── icons\             # ảnh PNG do AI sinh ra
+    ├── sub-1.png      # icon của gói đăng ký
+    └── acc-1a2b….png # avatar của hộp thư
+```
+
+Ảnh lưu cục bộ nên app vẫn hiện đúng icon khi **không có mạng**. Frontend nhận ảnh dưới
+dạng **data-URI** qua `GetIconData(file)`, nên không cần cấu hình máy chủ web riêng.
+
+Tên file luôn được kiểm tra là **tên đơn giản** (không có `..` hay dấu `/`), nên không thể
+đọc ra ngoài thư mục `icons`.
+
+### Sinh icon ứng dụng (`.ico` cho Windows)
+
+```bash
+cd desktop
+go run ./cmd/genicon
+```
+
+Lệnh này gọi dịch vụ tạo ảnh, rồi ghi:
+
+- `desktop/build/appicon.png` — ảnh 1024×1024
+- `desktop/build/windows/icon.ico` — file `.ico` multi-size (16 → 256 px)
+
+`wails build` lấy `build/windows/icon.ico` làm icon của file `.exe`.
+
+### Prompt sinh ảnh
+
+Prompt được dựng sẵn cho từng dịch vụ trong `internal/icon/presets.go`. Prompt mô tả
+**màu sắc và hình khối** chứ không yêu cầu tái tạo logo thương hiệu — ví dụ *"deep crimson
+red rounded square, a simple white play triangle"* cho Netflix. Với một dịch vụ chưa có
+trong danh sách, prompt được ghép từ tên dịch vụ và danh mục.
+
 ### Thêm endpoint của riêng bạn
 
 File cấu hình là **JSON thuần**, không cần sửa mã nguồn. Mỗi tích hợp có:
@@ -152,9 +197,9 @@ Không dùng framework test — mỗi lệnh dưới đây là một bộ kiểm
 
 ```bash
 cd desktop
-go test ./...                 # TOTP RFC 6238 + store + app + integrations
+go test ./...                 # TOTP RFC 6238 + store + app + icon + integrations
 
-cd frontend && npm test       # esc()/escJs() chống XSS
+cd frontend && npm test       # esc()/escJs() chống XSS + markup icon
 ```
 
 ### Kiểm thử thủ công
@@ -165,6 +210,9 @@ cd frontend && npm test       # esc()/escJs() chống XSS
 4. **Khóa Két** → mọi bí mật bị che **và** mọi nút Copy bị chặn.
 5. **Xuất** → **Nhập lại** → dữ liệu khôi phục đúng.
 6. Đổi theme Sáng/Tối → mọi vùng đổi màu đồng bộ.
+7. Bật dịch vụ tạo ảnh → **Thêm Gói** → chọn một mẫu trong lưới → bật *Tạo icon bằng AI*
+   → icon mới hiện sau khoảng 20-30 giây.
+8. Tắt dịch vụ tạo ảnh → nút **⚡ Icon** biến mất, badge chữ vẫn dùng được.
 
 ## Cấu trúc thư mục
 
@@ -191,8 +239,10 @@ submail-personal/
     └── frontend/
         ├── index.html           # Markup (shell sidebar + topbar)
         ├── src/main.js          # Logic giao diện, nối binding Go
+        ├── src/icons.js         # Markup ô icon + lưới preset (thuần, test được)
         ├── src/escape.js        # esc()/escJs() — chống XSS
         ├── src/escape.test.mjs  # node --test
+        ├── src/icons.test.mjs   # node --test
         ├── src/style.css        # Hệ CSS gốc (TailAdmin v2) + token sáng/tối
         └── src/assets/fonts/    # Outfit .woff2 (latin + latin-ext) — chạy offline
 ```

@@ -15,8 +15,14 @@ wails build    # build -> build/bin/submail-personal.exe
 ## Kiểm thử
 
 ```bash
-go test ./...                    # TOTP RFC 6238, store, app, integrations
-cd frontend && npm test          # esc()/escJs() chống XSS
+go test ./...                    # TOTP RFC 6238, store, app, icon, integrations
+cd frontend && npm test          # esc()/escJs() chống XSS + markup icon/preset
+```
+
+Kiểm thử với dịch vụ tạo ảnh thật (bỏ qua nếu không đặt biến môi trường):
+
+```bash
+SUBMAIL_IMAGE_INTEGRATION=1 go test -run TestImageIntegration ./...
 ```
 
 ## Bố cục
@@ -33,6 +39,19 @@ cd frontend && npm test          # esc()/escJs() chống XSS
 | `internal/icon/` | Xử lý PNG/ICO + prompt dựng sẵn |
 | `internal/integrations/` | Cấu hình & adapter gọi dịch vụ tuỳ chọn |
 | `frontend/` | Vite + vanilla JS; `src/escape.js` là hàng rào chống XSS |
+
+## Ảnh icon
+
+Ảnh do AI sinh nằm trong `%AppData%\SubMailPersonal\icons\`. Frontend nhận ảnh dưới dạng
+**data-URI** qua `GetIconData(file)` nên không cần máy chủ web riêng và vẫn hiện được khi
+mất mạng. Tên file luôn phải là **tên đơn giản** — `internal/icon.ValidName` chặn `..` và dấu
+phân tách đường dẫn.
+
+Sinh lại icon ứng dụng cho Windows:
+
+```bash
+go run ./cmd/genicon     # -> build/appicon.png + build/windows/icon.ico
+```
 
 ## Nguyên tắc kiến trúc
 
@@ -57,3 +76,7 @@ TailAdmin v2: sidebar cố định + topbar có ô tìm kiếm `Ctrl K`, font Ou
 
 Ba trang: **Két Gmail** (mật khẩu + mã 2FA sống theo từng hộp thư), **Tổng quan Subs**
 (chi phí, gia hạn, cảnh báo) và **Hệ thống** (dữ liệu, sao lưu, bảo mật).
+
+Modal **Thêm Gói Đăng Ký** có lưới **chọn nhanh** ~30 dịch vụ phổ biến lấy từ
+`GetIconPresets()`. Chọn một mẫu là tự điền tên, gói, danh mục, giá và phương thức thanh toán.
+Danh sách mẫu và prompt sinh ảnh nằm ở `internal/icon/presets.go`.

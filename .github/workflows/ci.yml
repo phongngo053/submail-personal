@@ -30,6 +30,7 @@ jobs:
           cache-dependency-path: desktop/go.sum
 
       - name: Check formatting
+        shell: bash
         run: |
           unformatted=$(gofmt -l .)
           if [ -n "$unformatted" ]; then
@@ -39,9 +40,11 @@ jobs:
           fi
 
       - name: Vet
+        shell: bash
         run: go vet ./...
 
       - name: Test
+        shell: bash
         run: go test ./... -count=1
 
   frontend:
