@@ -1,0 +1,8 @@
+# Keep line endings stable across platforms.
+* text=auto eol=lf
+
+# Binary files must never be touched.
+*.png binary
+*.ico binary
+*.woff2 binary
+*.exe binary
