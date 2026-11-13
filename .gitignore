@@ -31,6 +31,7 @@ submail-data.json
 
 # Local scratch pages used while tweaking the UI
 desktop/frontend/harness.html
+desktop/frontend/preview-icon.png
 
 # OS noise
 .DS_Store
