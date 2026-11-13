@@ -202,6 +202,23 @@ Dịch vụ tạo ảnh là **tuỳ chọn**, **mặc định tắt**, và cấu
   copy mã dự phòng, copy trong modal Quick Vault). Nay **mọi** đường copy đi qua
   `copyAccountSecret` / `copyCustomPass` và bị Go từ chối khi khóa — không nhân bản lại lỗi cũ.
 - `esc()` / `escJs()` là hàng rào XSS — không được bỏ khi thêm chỗ hiển thị dữ liệu mới.
+- **Két khóa ⇒ không được ghi đè bí mật.** Khi `a.locked == true`, payload frontend chỉ chứa
+  mask (`••••••••••••••`), nên `SaveGmail` / `SaveSubscription` phải **giữ nguyên** secret đã
+  lưu thay vì ghi giá trị từ payload — nếu không sẽ **xoá sạch mật khẩu thật**. Có test hồi
+  quy ở `icons_test.go`.
+
+## Ảnh icon — cần hiểu trước khi "sửa"
+
+- Ảnh AI lưu ở `%AppData%\SubMailPersonal\icons\`, tên file luôn là **tên đơn giản**;
+  `internal/icon.ValidName` chặn `..` và dấu phân tách đường dẫn.
+- Frontend nhận ảnh dưới dạng **data-URI** qua `App.GetIconData(file)`. **Đừng** phục vụ
+  ảnh qua HTTP: trong `wails dev`, Vite chạy `appType:"spa"` nên `htmlFallbackMiddleware`
+  ghi đè mọi URL lạ về `/index.html` ⇒ ảnh hỏng. Data-URI chạy giống nhau ở dev và prod.
+- Lệnh gọi HTTP tạo ảnh mất 15-30 giây ⇒ **không được giữ `a.mu`** trong lúc gọi, nếu
+  không toàn bộ UI bị treo. Chỉ khoá lúc ghi state + `persist()`.
+- Dịch vụ ảnh **không nhất quán về định dạng**: URL thường kết thúc bằng `.png` nhưng nội
+  dung có thể là JPEG. `icon.DecodePNG` nhận cả hai — đừng siết lại chỉ PNG.
+- Prompt sinh ảnh mô tả **màu sắc và hình khối**, không yêu cầu tái tạo logo thương hiệu.
 
 ## Cạm bẫt cần biết
 
